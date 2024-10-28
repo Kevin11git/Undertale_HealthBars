@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "undertale_healthbars",
+  "version": "${version}",
+  "name": "Undertale HealthBars",
+  "description": "A simple mod that adds healthbars from Undertale to Minecraft!",
+  "authors": [],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/undertale_healthbars/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "net.kevineleven.undertale_healthbars.client.Undertale_healthbarsClient"
+    ],
+    "main": [
+      "net.kevineleven.undertale_healthbars.Undertale_healthbars"
+    ]
+  },
+  "mixins": [
+    "undertale_healthbars.mixins.json",
+    {
+      "config": "undertale_healthbars.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
