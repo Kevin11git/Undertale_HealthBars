@@ -11,7 +11,7 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "net.kevineleven.undertale_healthbars.client.Undertale_healthbarsClient"
+      "net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient"
     ],
     "main": [
       "net.kevineleven.undertale_healthbars.Undertale_healthbars"

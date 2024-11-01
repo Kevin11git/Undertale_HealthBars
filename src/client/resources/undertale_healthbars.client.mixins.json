@@ -1,9 +1,10 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.kevineleven.undertale_healthbars.mixin.client",
+  "package": "net.kevineleven.undertale_healthbars.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "LivingEntityDamageMixin"
   ],
   "injectors": {
     "defaultRequire": 1
