@@ -4,7 +4,8 @@
   "package": "net.kevineleven.undertale_healthbars.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "LivingEntityDamageMixin"
+    "LivingEntityDamageMixin",
+    "LivingEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
