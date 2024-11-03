@@ -1,6 +1,7 @@
 package net.kevineleven.undertale_healthbars.client;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,8 @@ public class UndertaleHealthBarsClient implements ClientModInitializer {
     public void onInitializeClient() {
         LOGGER.info("Undertale healthbars mod loaded!");
 
+
+        WorldRenderEvents.AFTER_ENTITIES.register(new HealthBarRenderer());
 //        AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
 //            if (entity.isAlive()) {
 //                LivingEntity livingEntity = ((LivingEntity) entity);
