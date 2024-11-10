@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-// todo fix bar rendering behind some stuff like items or particles
+// todo fix bar rendering being kinda laggy
 public class HealthBarRenderer implements WorldRenderEvents.AfterEntities {
 
     @Unique
@@ -67,7 +67,7 @@ public class HealthBarRenderer implements WorldRenderEvents.AfterEntities {
             }
 
 
-            if (damageInfos.containsKey(livingEntity) || false) { // the 'false' is soon to be replaced with config to always show health
+            if (damageInfos.containsKey(livingEntity) || false) { // the 'false/true' is soon to be replaced with config to always show healthbar
 
                 MinecraftClient client = MinecraftClient.getInstance();
                 MatrixStack matrixStack = context.matrixStack();
@@ -97,8 +97,7 @@ public class HealthBarRenderer implements WorldRenderEvents.AfterEntities {
                 matrixStack.scale(-1, 1, 1);
 
                 Matrix4f model = matrixStack.peek().getPositionMatrix();
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
+                RenderSystem.enableDepthTest();
 
 
                 RenderSystem.setShader(GameRenderer::getPositionColorProgram);
@@ -171,11 +170,8 @@ public class HealthBarRenderer implements WorldRenderEvents.AfterEntities {
                 }
 
                 matrixStack.pop();
+                RenderSystem.disableDepthTest();
             }
-
-            RenderSystem.disableBlend();
-            RenderSystem.depthMask(true);
-            RenderSystem.depthFunc(515);
         }
     }
 
