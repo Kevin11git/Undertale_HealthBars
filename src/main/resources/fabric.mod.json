@@ -4,7 +4,7 @@
   "version": "${version}",
   "name": "Undertale HealthBars",
   "description": "A simple mod that adds healthbars from Undertale to Minecraft!",
-  "authors": [],
+  "authors": ["Kevin Eleven"],
   "contact": {},
   "license": "MIT",
   "icon": "assets/undertale_healthbars/icon.png",
