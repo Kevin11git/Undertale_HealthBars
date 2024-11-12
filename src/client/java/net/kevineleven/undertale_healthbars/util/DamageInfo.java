@@ -18,5 +18,6 @@ public class DamageInfo {
         // for changing values quick
 //        this.y_velocity = 0.23f;
 //        GRAVITY = 0.05f;
+//        this.timer = 100;
     }
 }

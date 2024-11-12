@@ -1,10 +1,14 @@
 package net.kevineleven.undertale_healthbars.client;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.kevineleven.undertale_healthbars.util.DamageInfo;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.LivingEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class UndertaleHealthBarsClient implements ClientModInitializer {
     public static final String MOD_ID = "undertale_healthbars";
@@ -12,21 +16,11 @@ public class UndertaleHealthBarsClient implements ClientModInitializer {
     public static final MinecraftClient client = MinecraftClient.getInstance();
 
 
+    public static Map<LivingEntity, Float> previousHealths = new HashMap<>();
+    public static Map<LivingEntity, DamageInfo> damageInfos = new HashMap<>();
 
     @Override
     public void onInitializeClient() {
         LOGGER.info("Undertale healthbars mod loaded!");
-
-
-        WorldRenderEvents.AFTER_ENTITIES.register(new HealthBarRenderer());
-//        AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-//            if (entity.isAlive()) {
-//                LivingEntity livingEntity = ((LivingEntity) entity);
-//                player.sendMessage(Text.of("Entity Health: " + livingEntity.getHealth()));
-//                return ActionResult.PASS;
-//            }
-//
-//            return ActionResult.PASS;
-//        });
     }
 }
