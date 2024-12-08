@@ -3,6 +3,7 @@ package net.kevineleven.undertale_healthbars.client;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.kevineleven.undertale_healthbars.event.EndClientTickEvent;
+import net.kevineleven.undertale_healthbars.sound.ModSounds;
 import net.kevineleven.undertale_healthbars.util.DamageInfo;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.LivingEntity;
@@ -28,7 +29,7 @@ public class UndertaleHealthBarsClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         LOGGER.info("Undertale healthbars mod loaded!");
-
+        ModSounds.initialize();
         ClientTickEvents.END_CLIENT_TICK.register(new EndClientTickEvent());
     }
 }

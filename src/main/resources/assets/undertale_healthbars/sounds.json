@@ -1,0 +1,14 @@
+{
+  "snd_damage": {
+    "subtitle": "sound.undertale_healthbars.snd_damage",
+    "sounds": [
+      "undertale_healthbars:snd_damage"
+    ]
+  },
+  "snd_heal": {
+    "subtitle": "sound.undertale_healthbars.snd_heal",
+    "sounds": [
+      "undertale_healthbars:snd_heal"
+    ]
+  }
+}
