@@ -5,6 +5,9 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Undertale_HealthBars.client.iml" filepath="$PROJECT_DIR$/.idea/modules/Undertale_HealthBars.client.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Undertale_HealthBars.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Undertale_HealthBars.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Undertale_HealthBars.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Undertale_HealthBars.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/net.kevineleven.Undertale_HealthBars.client.iml" filepath="$PROJECT_DIR$/.idea/modules/net.kevineleven.Undertale_HealthBars.client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/net.kevineleven.Undertale_HealthBars.main.iml" filepath="$PROJECT_DIR$/.idea/modules/net.kevineleven.Undertale_HealthBars.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/net.kevineleven.Undertale_HealthBars.test.iml" filepath="$PROJECT_DIR$/.idea/modules/net.kevineleven.Undertale_HealthBars.test.iml" />
     </modules>
   </component>
 </project>
