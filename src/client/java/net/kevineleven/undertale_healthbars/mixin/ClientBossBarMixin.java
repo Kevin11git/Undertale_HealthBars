@@ -2,6 +2,7 @@ package net.kevineleven.undertale_healthbars.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.kevineleven.undertale_healthbars.config.ModConfig;
 import net.minecraft.client.gui.hud.ClientBossBar;
 import net.minecraft.entity.boss.BossBar;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,7 +18,10 @@ public class ClientBossBarMixin {
     )
     private float removeLerpForEntityBossBars(float value, float min, float max, Operation<Float> original) {
         ClientBossBar bossBar = (ClientBossBar) (Object) this;
-        if (isBossBarOfEntity(bossBar)) {
+        if (isBossBarOfEntity(bossBar) &&
+           (ModConfig.showUndertaleBossbars || ModConfig.showUndertaleBossbarDamageNumbers || ModConfig.showUndertaleBossbarHealNumbers) &&
+                ModConfig.modEnabled
+        ) {
             return 1f;
         } else {
             return original.call(value, min , max);
