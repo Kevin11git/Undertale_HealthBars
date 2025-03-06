@@ -64,7 +64,7 @@ public abstract class LivingEntityDamageMixin {
                             (float) (ModConfig.healSoundVolume) / 100, 1f, Random.create(),
                             entity.getBlockPos()
                     ));
-                } else if (!isCurrentPlayer || ModConfig.damageSoundForYourself) {
+                } else if (damage > 0 && (!isCurrentPlayer || ModConfig.damageSoundForYourself)) {
                     soundManager.play(new PositionedSoundInstance(
                             ModSounds.DAMAGE,
                             SoundCategory.MASTER,
