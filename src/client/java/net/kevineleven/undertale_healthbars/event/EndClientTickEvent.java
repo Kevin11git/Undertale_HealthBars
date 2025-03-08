@@ -2,10 +2,15 @@ package net.kevineleven.undertale_healthbars.event;
 
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient;
+import net.kevineleven.undertale_healthbars.config.ModConfig;
+import net.kevineleven.undertale_healthbars.keybind.ModKeybinds;
 import net.kevineleven.undertale_healthbars.util.DamageInfo;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.BossBar;
+import net.minecraft.text.Text;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +21,21 @@ import static net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsCli
 public class EndClientTickEvent implements ClientTickEvents.EndTick {
     @Override
     public void onEndTick(MinecraftClient client) {
+        // Keybinds
+        if (ModKeybinds.TOGGLE_MOD.wasPressed()) {
+            ModConfig.modEnabled = !ModConfig.modEnabled;
+            ModConfig.HANDLER.save();
+
+            UndertaleHealthBarsClient.client.inGameHud.setOverlayMessage(Text.of("Undertale HealthBars Mod " + (ModConfig.modEnabled ? "Enabled" : "Disabled") + "!"), false);
+        }
+
+        if (ModKeybinds.OPEN_CONFIG.wasPressed()) {
+            Screen parent = UndertaleHealthBarsClient.client.currentScreen;
+            UndertaleHealthBarsClient.client.setScreen(ModConfig.getScreen(parent));
+        }
+
+
+        // damage info jumping and timer
         Map<LivingEntity, DamageInfo> damageInfosCopy = new HashMap<>(damageInfos);
         for (LivingEntity entity : damageInfosCopy.keySet()) {
             damageInfos.get(entity).timer--;
