@@ -37,9 +37,6 @@ public class LivingEntityRendererMixin extends EntityRenderer {
     @Inject(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At("RETURN"))
     public void render(LivingEntity livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
 
-        if (!(ModConfig.modEnabled)) {
-            return;
-        }
 
         if (!(shouldRenderForLivingEntity(livingEntity))) {
             return;
@@ -69,6 +66,11 @@ public class LivingEntityRendererMixin extends EntityRenderer {
             if (previousHealth == 0.0f) {
                 previousHealths.remove(livingEntity);
             }
+        }
+
+
+        if (!(ModConfig.modEnabled)) {
+            return;
         }
 
 

@@ -29,9 +29,6 @@ public abstract class LivingEntityDamageMixin {
 
     @Inject(method = "tick", at = @At("RETURN"))
     private void entityTick(CallbackInfo ci) {
-        if (!(ModConfig.modEnabled)) {
-            return;
-        }
 
         LivingEntity entity = (LivingEntity) (Object) this;
         if (!(entity.getWorld().isClient)) {
@@ -56,22 +53,24 @@ public abstract class LivingEntityDamageMixin {
                 float damage = oldHealth - newHealth;
                 SoundManager soundManager = client.getSoundManager();
 
-
-                if (damage < 0 && (!isCurrentPlayer || ModConfig.healSoundForYourself)) {
-                    soundManager.play(new PositionedSoundInstance(
-                            ModSounds.HEAL,
-                            SoundCategory.MASTER,
-                            (float) (ModConfig.healSoundVolume) / 100, 1f, Random.create(),
-                            entity.getBlockPos()
-                    ));
-                } else if (damage > 0 && (!isCurrentPlayer || ModConfig.damageSoundForYourself)) {
-                    soundManager.play(new PositionedSoundInstance(
-                            ModSounds.DAMAGE,
-                            SoundCategory.MASTER,
-                            (float) (ModConfig.damageSoundVolume) / 100,1f, Random.create(),
-                            entity.getBlockPos()
-                    ));
+                if (ModConfig.modEnabled) {
+                    if (damage < 0 && (!isCurrentPlayer || ModConfig.healSoundForYourself)) {
+                        soundManager.play(new PositionedSoundInstance(
+                                ModSounds.HEAL,
+                                SoundCategory.MASTER,
+                                (float) (ModConfig.healSoundVolume) / 100, 1f, Random.create(),
+                                entity.getBlockPos()
+                        ));
+                    } else if (damage > 0 && (!isCurrentPlayer || ModConfig.damageSoundForYourself)) {
+                        soundManager.play(new PositionedSoundInstance(
+                                ModSounds.DAMAGE,
+                                SoundCategory.MASTER,
+                                (float) (ModConfig.damageSoundVolume) / 100, 1f, Random.create(),
+                                entity.getBlockPos()
+                        ));
+                    }
                 }
+
 
                 if (
                         (damage < 0 && ModConfig.showHealNumbers) ||
