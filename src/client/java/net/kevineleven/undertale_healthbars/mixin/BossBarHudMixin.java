@@ -133,6 +133,9 @@ public class BossBarHudMixin {
                         context.getMatrices().scale(scale, scale, 1f);
                         for (int index = 0; index < textDamage.length(); index++) {
                             char currentChar = textDamage.charAt(index);
+                            if (currentChar == ',') {
+                                currentChar = '.';
+                            }
                             texture = Identifier.of(UndertaleHealthBarsClient.MOD_ID, "textures/ui/" + damage_or_heal + "_num_" + currentChar + ".png");
                             context.drawTexture(texture, (int) (number_x * (1 / scale) + damageInfo.y_offset * 30), (int) ((y - Math.ceil(10 * scale)) * (1 / scale)), 0, 0, 30, 30, 30, 30);
 

@@ -169,6 +169,9 @@ public class LivingEntityRendererMixin extends EntityRenderer {
 
                         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
                         char currentChar = textDamage.charAt(index);
+                        if (currentChar == ',') {
+                            currentChar = '.';
+                        }
                         texture = Identifier.of(UndertaleHealthBarsClient.MOD_ID, "textures/ui/" + damage_or_heal + "_num_" + currentChar + ".png");
 
                         RenderSystem.setShaderTexture(0, texture);
