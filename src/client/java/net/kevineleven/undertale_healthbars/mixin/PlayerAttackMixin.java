@@ -23,7 +23,7 @@ public abstract class PlayerAttackMixin {
         LivingEntity playerLiving =  (LivingEntity) player;
         LivingEntity targetLiving = ((LivingEntity) target);
 
-        player.sendMessage(Text.of("Entity Damage: " + i + ", Health: " + targetLiving.getHealth()));
+        player.sendMessage(Text.of("Entity Damage: " + i + ", Health: " + targetLiving.getHealth()), false);
     }
 
 }

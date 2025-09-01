@@ -6,6 +6,7 @@ import net.kevineleven.undertale_healthbars.config.ModConfig;
 import net.kevineleven.undertale_healthbars.util.DamageInfo;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.BossBarHud;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.boss.BossBar;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -38,7 +39,7 @@ public class BossBarHudMixin {
 
     @Inject(
             method = "renderBossBar(Lnet/minecraft/client/gui/DrawContext;IILnet/minecraft/entity/boss/BossBar;I[Lnet/minecraft/util/Identifier;[Lnet/minecraft/util/Identifier;)V",
-            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V")
+            at = @At(value = "RETURN")
     )
     private void renderBossBar(DrawContext context, int x, int y, BossBar bossBar, int width, Identifier[] textures, Identifier[] notchedTextures, CallbackInfo ci) {
         if (!(ModConfig.modEnabled)) {
@@ -137,7 +138,7 @@ public class BossBarHudMixin {
                                 currentChar = '.';
                             }
                             texture = Identifier.of(UndertaleHealthBarsClient.MOD_ID, "textures/ui/" + damage_or_heal + "_num_" + currentChar + ".png");
-                            context.drawTexture(texture, (int) (number_x * (1 / scale) + damageInfo.y_offset * 30), (int) ((y - Math.ceil(10 * scale)) * (1 / scale)), 0, 0, 30, 30, 30, 30);
+                            context.drawTexture(RenderLayer::getGuiTextured, texture, (int) (number_x * (1 / scale) + damageInfo.y_offset * 30), (int) ((y - Math.ceil(10 * scale)) * (1 / scale)), 0, 0, 30, 30, 30, 30);
 
                             number_x += (int) Math.ceil(31 * scale);
                         }
