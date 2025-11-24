@@ -59,6 +59,14 @@ public class ModConfig {
                         .option(optAlwaysShowHealthbar)
 
 
+                        .option(Option.<Float>createBuilder()
+                                .name(Text.translatable("config.undertale_healthbars.option.damageHealNumbersShowDuration"))
+                                .description(OptionDescription.of(Text.translatable("config.undertale_healthbars.option.damageHealNumbersShowDuration.description")))
+                                .binding(1.0f, () -> damageHealNumbersShowDuration, newVal -> damageHealNumbersShowDuration = newVal)
+                                .controller(opt -> FloatFieldControllerBuilder.create(opt).formatValue(val -> Text.literal(val + " second" + (val == 1f ? "" : "s"))))
+                                .build())
+
+
                         .option(Option.<Boolean>createBuilder()
                                 .name(Text.translatable("config.undertale_healthbars.option.showDamageNumbers"))
                                 .description(OptionDescription.of(Text.translatable("config.undertale_healthbars.option.showDamageNumbers.description")))
@@ -79,7 +87,7 @@ public class ModConfig {
                                 .name(Text.translatable("config.undertale_healthbars.option.healthbarOffset"))
                                 .description(OptionDescription.of(Text.translatable("config.undertale_healthbars.option.healthbarOffset.description")))
                                 .binding(0f, () -> healthbarOffset, newVal -> healthbarOffset = newVal)
-                                .controller(opt -> FloatFieldControllerBuilder.create(opt).formatValue(val -> Text.literal(val + " blocks")))
+                                .controller(opt -> FloatFieldControllerBuilder.create(opt).formatValue(val -> Text.literal(val + " block" + (val == 1f ? "" : "s"))))
                         .build())
 
 
@@ -142,6 +150,14 @@ public class ModConfig {
                         .build())
 
 
+                        .option(Option.<Float>createBuilder()
+                                .name(Text.translatable("config.undertale_healthbars.option.bossbarsDamageHealNumbersShowDuration"))
+                                .description(OptionDescription.of(Text.translatable("config.undertale_healthbars.option.bossbarsDamageHealNumbersShowDuration.description")))
+                                .binding(1.0f, () -> bossbarsDamageHealNumbersShowDuration, newVal -> bossbarsDamageHealNumbersShowDuration = newVal)
+                                .controller(opt -> FloatFieldControllerBuilder.create(opt).formatValue(val -> Text.literal(val + " second" + (val == 1f ? "" : "s"))))
+                                .build())
+
+
                         .option(Option.<Boolean>createBuilder()
                                 .name(Text.translatable("config.undertale_healthbars.option.showUndertaleBossbarDamageNumbers"))
                                 .description(OptionDescription.of(Text.translatable("config.undertale_healthbars.option.showUndertaleBossbarDamageNumbers.description")))
@@ -172,6 +188,8 @@ public class ModConfig {
     @SerialEntry
     public static boolean alwaysShowHealthbar = false;
     @SerialEntry
+    public static float damageHealNumbersShowDuration = 1.0f;
+    @SerialEntry
     public static boolean showDamageNumbers = true;
     @SerialEntry
     public static boolean showHealNumbers = true;
@@ -193,6 +211,8 @@ public class ModConfig {
     // Bossbars
     @SerialEntry
     public static boolean showUndertaleBossbars = true;
+    @SerialEntry
+    public static float bossbarsDamageHealNumbersShowDuration = 1.0f;
     @SerialEntry
     public static boolean showUndertaleBossbarDamageNumbers = true;
     @SerialEntry

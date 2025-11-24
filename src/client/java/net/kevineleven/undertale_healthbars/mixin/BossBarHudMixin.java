@@ -67,7 +67,7 @@ public class BossBarHudMixin {
                             (damage < 0 && ModConfig.showUndertaleBossbarHealNumbers) ||
                             (damage > 0 && ModConfig.showUndertaleBossbarDamageNumbers)
                     ) {
-                        bossDamageInfos.put(bossBar, new DamageInfo(damage, 20, 0.23f));
+                        bossDamageInfos.put(bossBar, new DamageInfo(damage, (int)(20f * ModConfig.bossbarsDamageHealNumbersShowDuration), 0.23f));
                     }
 
                     oldHealths.replace(bossBar, newHealth);

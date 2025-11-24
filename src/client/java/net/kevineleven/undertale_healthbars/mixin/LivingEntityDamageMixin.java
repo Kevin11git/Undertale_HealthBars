@@ -76,7 +76,7 @@ public abstract class LivingEntityDamageMixin {
                         (damage < 0 && ModConfig.showHealNumbers) ||
                         (damage > 0 && ModConfig.showDamageNumbers)
                 ) {
-                    damageInfos.put(entity, new DamageInfo(damage, 20, 0.23f));
+                    damageInfos.put(entity, new DamageInfo(damage, (int)(20f * ModConfig.damageHealNumbersShowDuration), 0.23f));
                 }
             }
             oldHealth = newHealth;

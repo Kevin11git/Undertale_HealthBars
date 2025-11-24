@@ -132,8 +132,9 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                 float width = 2.5f;
                 float height = 0.25f;
                 float healthPercent = Math.max(0.0f, previousHealth) / livingEntity.getMaxHealth();
+                healthPercent = Math.min(healthPercent, 1.0f); // make sure health bar doesn't go above 100%
 
-                drawQuad(matrixStack, queue, 0, 0, -0.001f, width + 0.01f, height + 0.01f, 0f, 0f, 0f, 1.0f);
+                drawQuad(matrixStack, queue, 0, 0, -0.01f, width + 0.01f, height + 0.01f, 0f, 0f, 0f, 1.0f);
                 drawQuad(matrixStack, queue, 0, 0, 0, width, height, 0.25f, 0.25f, 0.25f, 1);
                 float healthWidth = width * healthPercent;
 
