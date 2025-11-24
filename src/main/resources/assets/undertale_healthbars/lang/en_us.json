@@ -45,7 +45,7 @@
     "config.undertale_healthbars.option.showUndertaleBossbarHealNumbers.description": "Shows heals the boss gets to the right of the BossBar",
 
 
-    "key.undertale_healthbars.categories.undertale_healthbars": "Undertale Healthbars",
+    "key.category.undertale_healthbars.undertale_healthbars": "Undertale Healthbars",
     "key.undertale_healthbars.toggleMod": "Toggle Mod",
     "key.undertale_healthbars.openConfig": "Open Config"
 }

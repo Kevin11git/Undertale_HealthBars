@@ -4,9 +4,9 @@ package net.kevineleven.undertale_healthbars.mixin;
 import net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient;
 import net.kevineleven.undertale_healthbars.config.ModConfig;
 import net.kevineleven.undertale_healthbars.util.DamageInfo;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.BossBarHud;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.boss.BossBar;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -131,24 +131,24 @@ public class BossBarHudMixin {
                         int number_x = x + WIDTH + 5;
                         Identifier texture;
                         float scale = 0.5f;
-                        context.getMatrices().scale(scale, scale, 1f);
+                        context.getMatrices().scale(scale, scale);
                         for (int index = 0; index < textDamage.length(); index++) {
                             char currentChar = textDamage.charAt(index);
                             if (currentChar == ',') {
                                 currentChar = '.';
                             }
                             texture = Identifier.of(UndertaleHealthBarsClient.MOD_ID, "textures/ui/" + damage_or_heal + "_num_" + currentChar + ".png");
-                            context.drawTexture(RenderLayer::getGuiTextured, texture, (int) (number_x * (1 / scale) + damageInfo.y_offset * 30), (int) ((y - Math.ceil(10 * scale)) * (1 / scale)), 0, 0, 30, 30, 30, 30);
+                            context.drawTexture(RenderPipelines.GUI_TEXTURED, texture, (int) (number_x * (1 / scale) + damageInfo.y_offset * 30), (int) ((y - Math.ceil(10 * scale)) * (1 / scale)), 0, 0, 30, 30, 30, 30);
 
                             number_x += (int) Math.ceil(31 * scale);
                         }
-                        context.getMatrices().scale(1 / scale, 1 / scale, 1f);
+                        context.getMatrices().scale(1 / scale, 1 / scale);
                     }
                 }
 
                 if (ModConfig.showUndertaleBossbars) {
                     // black outline
-                    context.drawBorder(x - 1, y - 1, WIDTH + 2, rectangleHeight + 2, 0xFF000000);
+                    context.drawStrokedRectangle(x - 1, y - 1, WIDTH + 2, rectangleHeight + 2, 0xFF000000);
                 }
             }
         }

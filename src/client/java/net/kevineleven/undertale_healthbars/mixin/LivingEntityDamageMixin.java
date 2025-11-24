@@ -31,7 +31,7 @@ public abstract class LivingEntityDamageMixin {
     private void entityTick(CallbackInfo ci) {
 
         LivingEntity entity = (LivingEntity) (Object) this;
-        if (!(entity.getWorld().isClient)) {
+        if (!(entity.getEntityWorld().isClient())) {
             return;
         }
         if (!shouldRenderForLivingEntity(entity)) {
