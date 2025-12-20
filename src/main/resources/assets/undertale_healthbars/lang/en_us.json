@@ -11,6 +11,8 @@
     "config.undertale_healthbars.option.showHealthbar.description": "Shows/Hides HealthBars depending on this option.\nDamage/Heal numbers can be hidden from below options",
     "config.undertale_healthbars.option.alwaysShowHealthbar": "Always Show HealthBars",
     "config.undertale_healthbars.option.alwaysShowHealthbar.description": "If no, only will show HealthBar when an entity is damaged or healed.\nDoesn't work when above option is off",
+    "config.undertale_healthbars.option.maxDistance": "Max Distance",
+    "config.undertale_healthbars.option.maxDistance.description": "The maximum distance in blocks that HealthBars and Damage/Heal numbers can be seen if enabled.\nSet it to the maximum value to make the distance infinite",
     "config.undertale_healthbars.option.damageHealNumbersShowDuration": "Damage/Heal Numbers Show Duration",
     "config.undertale_healthbars.option.damageHealNumbersShowDuration.description": "How long in seconds to show the Damage or Heal numbers when an entity takes damage or heals\nThis also applies to the HealthBar if \"Always Show HealthBars\" is off",
     "config.undertale_healthbars.option.showDamageNumbers": "Show Damage Numbers",

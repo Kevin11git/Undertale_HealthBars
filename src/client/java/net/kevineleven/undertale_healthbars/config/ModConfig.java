@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.api.controller.FloatFieldControllerBuilder;
+import dev.isxander.yacl3.api.controller.FloatSliderControllerBuilder;
 import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
@@ -17,6 +18,10 @@ import net.minecraft.util.Identifier;
 
 
 public class ModConfig {
+
+    public static final float MAXIMUM_MAX_DISTANCE = 100f;
+
+
         public static ConfigClassHandler<ModConfig> HANDLER = ConfigClassHandler.createBuilder(ModConfig.class)
                 .id(Identifier.of(UndertaleHealthBarsClient.MOD_ID, "config"))
                 .serializer(config -> GsonConfigSerializerBuilder.create(config)
@@ -57,6 +62,19 @@ public class ModConfig {
                                 .build())
 
                         .option(optAlwaysShowHealthbar)
+
+
+                        .option(Option.<Float>createBuilder()
+                                .name(Text.translatable("config.undertale_healthbars.option.maxDistance"))
+                                .description(OptionDescription.of(Text.translatable("config.undertale_healthbars.option.maxDistance.description")))
+                                .binding(MAXIMUM_MAX_DISTANCE, () -> maxDistance, newVal -> maxDistance = newVal)
+                                .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0.5f, MAXIMUM_MAX_DISTANCE).step(0.5f)
+                                        .formatValue(val -> (val >= MAXIMUM_MAX_DISTANCE
+                                                ? Text.literal("Infinite")
+                                                : Text.literal(val + " block" + (val == 1f ? "" : "s"))
+                                        )) // Format to show infinite if max distance, else show distance in blocks
+                                )
+                                .build())
 
 
                         .option(Option.<Float>createBuilder()
@@ -187,6 +205,8 @@ public class ModConfig {
     public static boolean showHealthbar = true;
     @SerialEntry
     public static boolean alwaysShowHealthbar = false;
+    @SerialEntry
+    public static float maxDistance = MAXIMUM_MAX_DISTANCE;
     @SerialEntry
     public static float damageHealNumbersShowDuration = 1.0f;
     @SerialEntry

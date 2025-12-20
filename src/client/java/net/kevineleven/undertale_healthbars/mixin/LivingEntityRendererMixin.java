@@ -98,6 +98,15 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
             return;
         }
 
+        // Check if entity is within distance to show using the max distance config option
+        double distanceToCamera = livingEntity.distanceTo(UndertaleHealthBarsClient.client.getCameraEntity());
+        if (ModConfig.maxDistance < ModConfig.MAXIMUM_MAX_DISTANCE) { // don't check if distance is infinite
+            if (distanceToCamera > ModConfig.maxDistance) {
+                // Entity is outside max distance, don't show Healthbar and damage numbers etc
+                return;
+            }
+        }
+
 
         if (damageInfos.containsKey(livingEntity) || ModConfig.alwaysShowHealthbar) {
 
@@ -213,8 +222,8 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                           float b,
                           float a
     ) {
-        // could also prob use RenderLayer.getLightning(); if i dont want to specify light
-        queue.submitCustom(matrixStack, RenderLayer.getTextBackground(), (matricesEntry, buffer) -> {
+        // could also prob use RenderLayers.lightning(); if i dont want to specify light
+        queue.submitCustom(matrixStack, RenderLayers.textBackground(), (matricesEntry, buffer) -> {
             Matrix4f model = matricesEntry.getPositionMatrix();
 
             // Bottom Left <v
@@ -238,7 +247,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                                   float textureHeight
     ) {
 
-        queue.submitCustom(matrixStack, RenderLayer.getText(texture), (matricesEntry, buffer) -> {
+        queue.submitCustom(matrixStack, RenderLayers.text(texture), (matricesEntry, buffer) -> {
             Matrix4f model = matricesEntry.getPositionMatrix();
 
             // Bottom Left <v
