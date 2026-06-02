@@ -7,9 +7,9 @@ import net.kevineleven.undertale_healthbars.event.EndClientTickEvent;
 import net.kevineleven.undertale_healthbars.keybind.ModKeybinds;
 import net.kevineleven.undertale_healthbars.sound.ModSounds;
 import net.kevineleven.undertale_healthbars.util.DamageInfo;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.boss.BossBar;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.BossEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,14 +19,14 @@ import java.util.Map;
 public class UndertaleHealthBarsClient implements ClientModInitializer {
     public static final String MOD_ID = "undertale_healthbars";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    public static final MinecraftClient client = MinecraftClient.getInstance();
+    public static final Minecraft client = Minecraft.getInstance();
 
 
     public static Map<LivingEntity, Float> previousHealths = new HashMap<>();
     public static Map<LivingEntity, DamageInfo> damageInfos = new HashMap<>();
 
-    public static Map<BossBar, Float> bossPreviousHealths = new HashMap<>();
-    public static Map<BossBar, DamageInfo> bossDamageInfos = new HashMap<>();
+    public static Map<BossEvent, Float> bossPreviousHealths = new HashMap<>();
+    public static Map<BossEvent, DamageInfo> bossDamageInfos = new HashMap<>();
 
     @Override
     public void onInitializeClient() {

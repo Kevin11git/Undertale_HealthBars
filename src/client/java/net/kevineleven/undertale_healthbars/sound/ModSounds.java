@@ -1,10 +1,10 @@
 package net.kevineleven.undertale_healthbars.sound;
 
 import net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.resources.Identifier;
 
 public class ModSounds {
     private ModSounds() {
@@ -15,8 +15,8 @@ public class ModSounds {
     public static final SoundEvent HEAL = registerSound("snd_heal");
 
     private static SoundEvent registerSound(String id) {
-        Identifier identifier = Identifier.of(UndertaleHealthBarsClient.MOD_ID, id);
-        return Registry.register(Registries.SOUND_EVENT, identifier, SoundEvent.of(identifier));
+        Identifier identifier = Identifier.fromNamespaceAndPath(UndertaleHealthBarsClient.MOD_ID, id);
+        return Registry.register(BuiltInRegistries.SOUND_EVENT, identifier, SoundEvent.createVariableRangeEvent(identifier));
     }
 
     public static void initialize() {

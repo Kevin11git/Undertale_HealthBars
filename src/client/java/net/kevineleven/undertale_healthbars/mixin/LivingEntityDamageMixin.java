@@ -5,13 +5,13 @@ import net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient;
 import net.kevineleven.undertale_healthbars.config.ModConfig;
 import net.kevineleven.undertale_healthbars.sound.ModSounds;
 import net.kevineleven.undertale_healthbars.util.DamageInfo;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.sound.SoundManager;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,20 +31,20 @@ public abstract class LivingEntityDamageMixin {
     private void entityTick(CallbackInfo ci) {
 
         LivingEntity entity = (LivingEntity) (Object) this;
-        if (!(entity.getEntityWorld().isClient())) {
+        if (!(entity.level().isClientSide())) {
             return;
         }
         if (!shouldRenderForLivingEntity(entity)) {
             return;
         }
-        MinecraftClient client = UndertaleHealthBarsClient.client;
+        Minecraft client = UndertaleHealthBarsClient.client;
 
 
         float newHealth = entity.getHealth();
         if (newHealth != oldHealth) {
             if (oldHealth != -473.113f) {
                 boolean isCurrentPlayer = false;
-                if (entity instanceof PlayerEntity playerEntity) {
+                if (entity instanceof Player playerEntity) {
                     if (UndertaleHealthBarsClient.client.player.equals(playerEntity)) {
                         isCurrentPlayer = true;
                     }
@@ -55,18 +55,18 @@ public abstract class LivingEntityDamageMixin {
 
                 if (ModConfig.modEnabled) {
                     if (damage < 0 && (!isCurrentPlayer || ModConfig.healSoundForYourself)) {
-                        soundManager.play(new PositionedSoundInstance(
+                        soundManager.play(new SimpleSoundInstance(
                                 ModSounds.HEAL,
-                                SoundCategory.MASTER,
-                                (float) (ModConfig.healSoundVolume) / 100, 1f, Random.create(),
-                                entity.getBlockPos()
+                                SoundSource.MASTER,
+                                (float) (ModConfig.healSoundVolume) / 100, 1f, RandomSource.create(),
+                                entity.blockPosition()
                         ));
                     } else if (damage > 0 && (!isCurrentPlayer || ModConfig.damageSoundForYourself)) {
-                        soundManager.play(new PositionedSoundInstance(
+                        soundManager.play(new SimpleSoundInstance(
                                 ModSounds.DAMAGE,
-                                SoundCategory.MASTER,
-                                (float) (ModConfig.damageSoundVolume) / 100, 1f, Random.create(),
-                                entity.getBlockPos()
+                                SoundSource.MASTER,
+                                (float) (ModConfig.damageSoundVolume) / 100, 1f, RandomSource.create(),
+                                entity.blockPosition()
                         ));
                     }
                 }

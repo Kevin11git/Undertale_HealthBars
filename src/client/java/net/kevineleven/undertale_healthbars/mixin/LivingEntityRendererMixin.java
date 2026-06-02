@@ -3,21 +3,21 @@ package net.kevineleven.undertale_healthbars.mixin;
 import net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient;
 import net.kevineleven.undertale_healthbars.config.ModConfig;
 import net.kevineleven.undertale_healthbars.util.DamageInfo;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.feature.FeatureRendererContext;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.entity.state.LivingEntityRenderState;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.scoreboard.ScoreboardDisplaySlot;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.scores.DisplaySlot;
+import net.minecraft.resources.Identifier;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -39,24 +39,24 @@ import static net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsCli
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>>
         extends EntityRenderer<T, S>
-        implements FeatureRendererContext<S, M> {
+        implements RenderLayerParent<S, M> {
 
     @Unique private static final java.util.WeakHashMap<LivingEntityRenderState, LivingEntity> ENTITY_MAP = new java.util.WeakHashMap<>();
 
-    protected LivingEntityRendererMixin(EntityRendererFactory.Context context) {
+    protected LivingEntityRendererMixin(EntityRendererProvider.Context context) {
         super(context);
     }
 
 
-    @Inject(method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V", at = @At("TAIL"))
+    @Inject(method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V", at = @At("TAIL"))
     public void updateRenderState(T livingEntity, S livingEntityRenderState, float f, CallbackInfo ci){
         // Store the entity in a WeakHashMap keyed by the render state
         // This prevents the health sharing bug where entities of the same type show the same health
         // Using WeakHashMap ensures render states are garbage collected when no longer needed
         ENTITY_MAP.put(livingEntityRenderState, livingEntity);
     }
-    @Inject(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/state/CameraRenderState;)V", at = @At("RETURN"))
-    public void render(S livingEntityRenderState, MatrixStack matrixStack, OrderedRenderCommandQueue queue, CameraRenderState cameraRenderState, CallbackInfo ci) {
+    @Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/CameraRenderState;)V", at = @At("RETURN"))
+    public void render(S livingEntityRenderState, PoseStack matrixStack, SubmitNodeCollector queue, CameraRenderState cameraRenderState, CallbackInfo ci) {
         // Retrieve the entity from the map
         LivingEntity livingEntity = ENTITY_MAP.get(livingEntityRenderState);
 
@@ -110,29 +110,29 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
         if (damageInfos.containsKey(livingEntity) || ModConfig.alwaysShowHealthbar) {
 
-            MinecraftClient client = MinecraftClient.getInstance();
+            Minecraft client = Minecraft.getInstance();
 
-            matrixStack.push();
+            matrixStack.pushPose();
 
             float x = 0.0f;
             float y = 0.0f;
             float z = 0.0f;
 
             double d = livingEntity.distanceTo(client.getCameraEntity());
-            matrixStack.translate(x, y + livingEntity.getHeight() + 0.5f + ModConfig.healthbarOffset, z);
-            if ((livingEntity.hasCustomName() && d <= 4096.0) || (livingEntity instanceof PlayerEntity)) {
+            matrixStack.translate(x, y + livingEntity.getBbHeight() + 0.5f + ModConfig.healthbarOffset, z);
+            if ((livingEntity.hasCustomName() && d <= 4096.0) || (livingEntity instanceof Player)) {
                 matrixStack.translate(0.0D, 9.0F * 1.15F * 0.025F, 0.0D);
 
-                if (livingEntity instanceof PlayerEntity playerEntity) {
-                    if (d < 100.0 && playerEntity.getEntityWorld().getScoreboard().getObjectiveForSlot(ScoreboardDisplaySlot.BELOW_NAME) != null) {
+                if (livingEntity instanceof Player playerEntity) {
+                    if (d < 100.0 && playerEntity.level().getScoreboard().getDisplayObjective(DisplaySlot.BELOW_NAME) != null) {
                         matrixStack.translate(0.0D, 9.0F * 1.15F * 0.025F, 0.0D);
                     }
                 }
             }
 
 
-            assert this.dispatcher.camera != null;
-            matrixStack.multiply(this.dispatcher.camera.getRotation());
+            assert this.entityRenderDispatcher.camera != null;
+            matrixStack.mulPose(this.entityRenderDispatcher.camera.rotation());
 
             matrixStack.scale(-1, 1, 1);
 
@@ -195,7 +195,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                         if (currentChar == ',') {
                             currentChar = '.';
                         }
-                        texture = Identifier.of(UndertaleHealthBarsClient.MOD_ID, "textures/ui/" + damage_or_heal + "_num_" + currentChar + ".png");
+                        texture = Identifier.fromNamespaceAndPath(UndertaleHealthBarsClient.MOD_ID, "textures/ui/" + damage_or_heal + "_num_" + currentChar + ".png");
                         drawDamageNumber(matrixStack, queue, texture, x, 1f + damageInfo.y_offset, 0, 1, 1, 1, 1);
 
                         x -= 1.1f;
@@ -204,14 +204,14 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
             }
 
-            matrixStack.pop();
+            matrixStack.popPose();
         }
 
     }
 
 
     @Unique
-    private void drawQuad(MatrixStack matrixStack, OrderedRenderCommandQueue queue,
+    private void drawQuad(PoseStack matrixStack, SubmitNodeCollector queue,
                           float x,
                           float y,
                           float z,
@@ -223,21 +223,21 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                           float a
     ) {
         // could also prob use RenderLayers.lightning(); if i dont want to specify light
-        queue.submitCustom(matrixStack, RenderLayers.textBackground(), (matricesEntry, buffer) -> {
-            Matrix4f model = matricesEntry.getPositionMatrix();
+        queue.submitCustomGeometry(matrixStack, RenderTypes.textBackground(), (matricesEntry, buffer) -> {
+            Matrix4f model = matricesEntry.pose();
 
             // Bottom Left <v
-            buffer.vertex(model, x + (width / 2), (y - height) + (height / 2), z).color(r, g, b, a).light(15728880);
+            buffer.addVertex(model, x + (width / 2), (y - height) + (height / 2), z).setColor(r, g, b, a).setLight(15728880);
             // Bottom Right >v
-            buffer.vertex(model, (x - width) + (width / 2), (y - height) + (height / 2), z).color(r, g, b, a).light(15728880);
+            buffer.addVertex(model, (x - width) + (width / 2), (y - height) + (height / 2), z).setColor(r, g, b, a).setLight(15728880);
             // Top Right >^
-            buffer.vertex(model, (x - width) + (width / 2), y + (height / 2), z).color(r, g, b, a).light(15728880);
+            buffer.addVertex(model, (x - width) + (width / 2), y + (height / 2), z).setColor(r, g, b, a).setLight(15728880);
             // Top Left <^
-            buffer.vertex(model, x + (width / 2), y + (height / 2), z).color(r, g, b, a).light(15728880);
+            buffer.addVertex(model, x + (width / 2), y + (height / 2), z).setColor(r, g, b, a).setLight(15728880);
         });
     }
     @Unique
-    private void drawDamageNumber(MatrixStack matrixStack, OrderedRenderCommandQueue queue, Identifier texture,
+    private void drawDamageNumber(PoseStack matrixStack, SubmitNodeCollector queue, Identifier texture,
                                   float x,
                                   float y,
                                   float z,
@@ -247,17 +247,17 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                                   float textureHeight
     ) {
 
-        queue.submitCustom(matrixStack, RenderLayers.text(texture), (matricesEntry, buffer) -> {
-            Matrix4f model = matricesEntry.getPositionMatrix();
+        queue.submitCustomGeometry(matrixStack, RenderTypes.text(texture), (matricesEntry, buffer) -> {
+            Matrix4f model = matricesEntry.pose();
 
             // Bottom Left <v
-            buffer.vertex(model, x + (width / 2), (y - height) + (height / 2), z).texture(0, textureHeight).light(15728880).color(1f, 1f, 1f, 1f);
+            buffer.addVertex(model, x + (width / 2), (y - height) + (height / 2), z).setUv(0, textureHeight).setLight(15728880).setColor(1f, 1f, 1f, 1f);
             // Bottom Right >v
-            buffer.vertex(model, (x - width) + (width / 2), (y - height) + (height / 2), z).texture(textureWidth, textureHeight).light(15728880).color(1f, 1f, 1f, 1f);
+            buffer.addVertex(model, (x - width) + (width / 2), (y - height) + (height / 2), z).setUv(textureWidth, textureHeight).setLight(15728880).setColor(1f, 1f, 1f, 1f);
             // Top Right >^
-            buffer.vertex(model, (x - width) + (width / 2), y + (height / 2), z).texture(textureWidth, 0).light(15728880).color(1f, 1f, 1f, 1f);
+            buffer.addVertex(model, (x - width) + (width / 2), y + (height / 2), z).setUv(textureWidth, 0).setLight(15728880).setColor(1f, 1f, 1f, 1f);
             // Top Left <^
-            buffer.vertex(model, x + (width / 2), y + (height / 2), z).texture(0, 0).light(15728880).color(1f, 1f, 1f, 1f);
+            buffer.addVertex(model, x + (width / 2), y + (height / 2), z).setUv(0, 0).setLight(15728880).setColor(1f, 1f, 1f, 1f);
         });
     }
 
@@ -266,7 +266,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
     private boolean shouldRenderForLivingEntity(LivingEntity livingEntity) {
         boolean isCurrentPlayer = false;
 
-        if (livingEntity instanceof PlayerEntity playerEntity && !ModConfig.renderForYourself) {
+        if (livingEntity instanceof Player playerEntity && !ModConfig.renderForYourself) {
             if (UndertaleHealthBarsClient.client.player.equals(playerEntity)) {
                 isCurrentPlayer = true;
             }
@@ -276,7 +276,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
         return !livingEntity.isInvisibleTo(UndertaleHealthBarsClient.client.player) &&
                 (livingEntity.isAlive() || previousHealths.containsKey(livingEntity)) &&
-                !Objects.equals(livingEntity.getType().getName().getString(), "Armor Stand") &&
+                !Objects.equals(livingEntity.getType().getDescription().getString(), "Armor Stand") &&
                 !isCurrentPlayer
                 ;
     }

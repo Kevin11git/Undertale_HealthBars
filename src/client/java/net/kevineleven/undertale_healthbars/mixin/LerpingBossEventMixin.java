@@ -3,21 +3,21 @@ package net.kevineleven.undertale_healthbars.mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.kevineleven.undertale_healthbars.config.ModConfig;
-import net.minecraft.client.gui.hud.ClientBossBar;
-import net.minecraft.entity.boss.BossBar;
+import net.minecraft.client.gui.components.LerpingBossEvent;
+import net.minecraft.world.BossEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(ClientBossBar.class)
-public class ClientBossBarMixin {
+@Mixin(LerpingBossEvent.class)
+public class LerpingBossEventMixin {
 
     @WrapOperation(
-            method = "getPercent",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;clamp(FFF)F")
+            method = "getProgress",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(FFF)F")
     )
     private float removeLerpForEntityBossBars(float value, float min, float max, Operation<Float> original) {
-        ClientBossBar bossBar = (ClientBossBar) (Object) this;
+        LerpingBossEvent bossBar = (LerpingBossEvent) (Object) this;
         if (isBossBarOfEntity(bossBar) &&
            (ModConfig.showUndertaleBossbars || ModConfig.showUndertaleBossbarDamageNumbers || ModConfig.showUndertaleBossbarHealNumbers) &&
                 ModConfig.modEnabled
@@ -29,7 +29,7 @@ public class ClientBossBarMixin {
     }
 
     @Unique
-    private boolean isBossBarOfEntity(BossBar bossBar) {
+    private boolean isBossBarOfEntity(BossEvent bossBar) {
         if (
                 bossBar.getName().getString().equals("Ender Dragon") ||
                         bossBar.getName().getString().equals("Wither")

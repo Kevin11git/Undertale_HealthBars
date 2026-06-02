@@ -6,11 +6,11 @@ import net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient;
 import net.kevineleven.undertale_healthbars.config.ModConfig;
 import net.kevineleven.undertale_healthbars.keybind.ModKeybinds;
 import net.kevineleven.undertale_healthbars.util.DamageInfo;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.boss.BossBar;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.BossEvent;
+import net.minecraft.network.chat.Component;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,17 +20,17 @@ import static net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsCli
 
 public class EndClientTickEvent implements ClientTickEvents.EndTick {
     @Override
-    public void onEndTick(MinecraftClient client) {
+    public void onEndTick(Minecraft client) {
         // Keybinds
-        if (ModKeybinds.TOGGLE_MOD.wasPressed()) {
+        if (ModKeybinds.TOGGLE_MOD.consumeClick()) {
             ModConfig.modEnabled = !ModConfig.modEnabled;
             ModConfig.HANDLER.save();
 
-            UndertaleHealthBarsClient.client.inGameHud.setOverlayMessage(Text.of("Undertale HealthBars Mod " + (ModConfig.modEnabled ? "Enabled" : "Disabled") + "!"), false);
+            UndertaleHealthBarsClient.client.gui.setOverlayMessage(Component.nullToEmpty("Undertale HealthBars Mod " + (ModConfig.modEnabled ? "Enabled" : "Disabled") + "!"), false);
         }
 
-        if (ModKeybinds.OPEN_CONFIG.wasPressed()) {
-            Screen parent = UndertaleHealthBarsClient.client.currentScreen;
+        if (ModKeybinds.OPEN_CONFIG.consumeClick()) {
+            Screen parent = UndertaleHealthBarsClient.client.screen;
             UndertaleHealthBarsClient.client.setScreen(ModConfig.getScreen(parent));
         }
 
@@ -49,8 +49,8 @@ public class EndClientTickEvent implements ClientTickEvents.EndTick {
             }
         }
 
-        Map<BossBar, DamageInfo> bossDamageInfosCopy = new HashMap<>(bossDamageInfos);
-        for (BossBar bossBar : bossDamageInfosCopy.keySet()) {
+        Map<BossEvent, DamageInfo> bossDamageInfosCopy = new HashMap<>(bossDamageInfos);
+        for (BossEvent bossBar : bossDamageInfosCopy.keySet()) {
             bossDamageInfos.get(bossBar).timer--;
 
             if (bossDamageInfos.get(bossBar).timer <= 0) {
