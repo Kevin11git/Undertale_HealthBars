@@ -1,6 +1,6 @@
 package net.kevineleven.undertale_healthbars.keybind;
 
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -23,7 +23,7 @@ public class ModKeybinds {
 
 
     private static KeyMapping registerKeybind(String name, int default_key, KeyMapping.Category category) {
-        return KeyBindingHelper.registerKeyBinding(new KeyMapping(
+        return KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 name, // The translation key of the keybinding's name
                 InputConstants.Type.KEYSYM, // The type of the keybinding, KEYSYM for keyboard, MOUSE for mouse.
                 default_key, // The keycode of the key

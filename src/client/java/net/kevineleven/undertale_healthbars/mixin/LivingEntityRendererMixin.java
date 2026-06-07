@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.state.CameraRenderState;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -55,8 +54,8 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         // Using WeakHashMap ensures render states are garbage collected when no longer needed
         ENTITY_MAP.put(livingEntityRenderState, livingEntity);
     }
-    @Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/CameraRenderState;)V", at = @At("RETURN"))
-    public void render(S livingEntityRenderState, PoseStack matrixStack, SubmitNodeCollector queue, CameraRenderState cameraRenderState, CallbackInfo ci) {
+    @Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At("RETURN"))
+    public void render(S livingEntityRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, net.minecraft.client.renderer.state.level.CameraRenderState camera, CallbackInfo ci) {
         // Retrieve the entity from the map
         LivingEntity livingEntity = ENTITY_MAP.get(livingEntityRenderState);
 
@@ -112,29 +111,29 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
             Minecraft client = Minecraft.getInstance();
 
-            matrixStack.pushPose();
+            poseStack.pushPose();
 
             float x = 0.0f;
             float y = 0.0f;
             float z = 0.0f;
 
             double d = livingEntity.distanceTo(client.getCameraEntity());
-            matrixStack.translate(x, y + livingEntity.getBbHeight() + 0.5f + ModConfig.healthbarOffset, z);
+            poseStack.translate(x, y + livingEntity.getBbHeight() + 0.5f + ModConfig.healthbarOffset, z);
             if ((livingEntity.hasCustomName() && d <= 4096.0) || (livingEntity instanceof Player)) {
-                matrixStack.translate(0.0D, 9.0F * 1.15F * 0.025F, 0.0D);
+                poseStack.translate(0.0D, 9.0F * 1.15F * 0.025F, 0.0D);
 
                 if (livingEntity instanceof Player playerEntity) {
                     if (d < 100.0 && playerEntity.level().getScoreboard().getDisplayObjective(DisplaySlot.BELOW_NAME) != null) {
-                        matrixStack.translate(0.0D, 9.0F * 1.15F * 0.025F, 0.0D);
+                        poseStack.translate(0.0D, 9.0F * 1.15F * 0.025F, 0.0D);
                     }
                 }
             }
 
 
             assert this.entityRenderDispatcher.camera != null;
-            matrixStack.mulPose(this.entityRenderDispatcher.camera.rotation());
+            poseStack.mulPose(this.entityRenderDispatcher.camera.rotation());
 
-            matrixStack.scale(-1, 1, 1);
+            poseStack.scale(-1, 1, 1);
 
             if (ModConfig.showHealthbar && (damageInfos.containsKey(livingEntity) || ModConfig.alwaysShowHealthbar)) {
 
@@ -143,13 +142,13 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                 float healthPercent = Math.max(0.0f, previousHealth) / livingEntity.getMaxHealth();
                 healthPercent = Math.min(healthPercent, 1.0f); // make sure health bar doesn't go above 100%
 
-                drawQuad(matrixStack, queue, 0, 0, -0.01f, width + 0.01f, height + 0.01f, 0f, 0f, 0f, 1.0f);
-                drawQuad(matrixStack, queue, 0, 0, 0, width, height, 0.25f, 0.25f, 0.25f, 1);
+                drawQuad(poseStack, submitNodeCollector, 0, 0, -0.01f, width + 0.01f, height + 0.01f, 0f, 0f, 0f, 1.0f);
+                drawQuad(poseStack, submitNodeCollector, 0, 0, 0, width, height, 0.25f, 0.25f, 0.25f, 1);
                 float healthWidth = width * healthPercent;
 
 
                 float healthOffset = -((healthWidth / 2) - (width / 2));
-                drawQuad(matrixStack, queue, healthOffset, 0, 0.001f, healthWidth, height, 0, 0.84f, 0, 1.0f);
+                drawQuad(poseStack, submitNodeCollector, healthOffset, 0, 0.001f, healthWidth, height, 0, 0.84f, 0, 1.0f);
 
 
                 // Might add health number/percent text later
@@ -186,7 +185,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                         textDamage = String.format("%.2f", damage);
                     }
 
-                    matrixStack.scale(0.5f, 0.5f, 0.5f);
+                    poseStack.scale(0.5f, 0.5f, 0.5f);
 
                     x = ((textDamage.length() - 1f) * 1.1f) / 2f;
                     Identifier texture;
@@ -196,7 +195,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                             currentChar = '.';
                         }
                         texture = Identifier.fromNamespaceAndPath(UndertaleHealthBarsClient.MOD_ID, "textures/ui/" + damage_or_heal + "_num_" + currentChar + ".png");
-                        drawDamageNumber(matrixStack, queue, texture, x, 1f + damageInfo.y_offset, 0, 1, 1, 1, 1);
+                        drawDamageNumber(poseStack, submitNodeCollector, texture, x, 1f + damageInfo.y_offset, 0, 1, 1, 1, 1);
 
                         x -= 1.1f;
                     }
@@ -204,7 +203,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
             }
 
-            matrixStack.popPose();
+            poseStack.popPose();
         }
 
     }

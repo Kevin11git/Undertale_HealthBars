@@ -4,8 +4,8 @@ package net.kevineleven.undertale_healthbars.mixin;
 import net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient;
 import net.kevineleven.undertale_healthbars.config.ModConfig;
 import net.kevineleven.undertale_healthbars.util.DamageInfo;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.BossHealthOverlay;
 import net.minecraft.world.BossEvent;
 import net.minecraft.resources.Identifier;
@@ -38,10 +38,10 @@ public class BossHealthOverlayMixin {
     Map<BossEvent, Float> oldHealths = new HashMap<>(); // for damage info
 
     @Inject(
-            method = "drawBar(Lnet/minecraft/client/gui/GuiGraphics;IILnet/minecraft/world/BossEvent;I[Lnet/minecraft/resources/Identifier;[Lnet/minecraft/resources/Identifier;)V",
+            method = "extractBar(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IILnet/minecraft/world/BossEvent;I[Lnet/minecraft/resources/Identifier;[Lnet/minecraft/resources/Identifier;)V",
             at = @At(value = "RETURN")
     )
-    private void renderBossBar(GuiGraphics context, int x, int y, BossEvent bossBar, int width, Identifier[] textures, Identifier[] notchedTextures, CallbackInfo ci) {
+    private void renderBossBar(GuiGraphicsExtractor graphics, int x, int y, BossEvent bossBar, int width, Identifier[] sprites, Identifier[] overlaySprites, CallbackInfo ci) {
         if (!(ModConfig.modEnabled)) {
             return;
         }
@@ -58,7 +58,7 @@ public class BossHealthOverlayMixin {
 
             float previousHealth = bossPreviousHealths.get(bossBar);
 
-            if (Arrays.equals(textures, BAR_BACKGROUND_SPRITES)){
+            if (Arrays.equals(sprites, BAR_BACKGROUND_SPRITES)){
                 float oldHealth = oldHealths.get(bossBar);
                 float newHealth = bossBar.getProgress() * getMaxHealthFromBossBar(bossBar);
                 if (newHealth != oldHealth) {
@@ -97,13 +97,13 @@ public class BossHealthOverlayMixin {
 
                 if (ModConfig.showUndertaleBossbars) {
                     // gray background rect
-                    context.fill(x, y, x + width, y + rectangleHeight, 0xFF404040);
+                    graphics.fill(x, y, x + width, y + rectangleHeight, 0xFF404040);
                 }
 
-            } else if (Arrays.equals(textures, BAR_PROGRESS_SPRITES)) {
+            } else if (Arrays.equals(sprites, BAR_PROGRESS_SPRITES)) {
                 if (ModConfig.showUndertaleBossbars) {
                     // green health rect
-                    context.fill(x, y, x + ((int) Math.ceil(Math.max(0.0f, previousHealth) * BAR_WIDTH)), y + rectangleHeight, 0xFF00D600);
+                    graphics.fill(x, y, x + ((int) Math.ceil(Math.max(0.0f, previousHealth) * BAR_WIDTH)), y + rectangleHeight, 0xFF00D600);
                 }
                 // damage numbers
 
@@ -131,24 +131,24 @@ public class BossHealthOverlayMixin {
                         int number_x = x + BAR_WIDTH + 5;
                         Identifier texture;
                         float scale = 0.5f;
-                        context.pose().scale(scale, scale);
+                        graphics.pose().scale(scale, scale);
                         for (int index = 0; index < textDamage.length(); index++) {
                             char currentChar = textDamage.charAt(index);
                             if (currentChar == ',') {
                                 currentChar = '.';
                             }
                             texture = Identifier.fromNamespaceAndPath(UndertaleHealthBarsClient.MOD_ID, "textures/ui/" + damage_or_heal + "_num_" + currentChar + ".png");
-                            context.blit(RenderPipelines.GUI_TEXTURED, texture, (int) (number_x * (1 / scale) + damageInfo.y_offset * 30), (int) ((y - Math.ceil(10 * scale)) * (1 / scale)), 0, 0, 30, 30, 30, 30);
+                            graphics.blit(RenderPipelines.GUI_TEXTURED, texture, (int) (number_x * (1 / scale) + damageInfo.y_offset * 30), (int) ((y - Math.ceil(10 * scale)) * (1 / scale)), 0, 0, 30, 30, 30, 30);
 
                             number_x += (int) Math.ceil(31 * scale);
                         }
-                        context.pose().scale(1 / scale, 1 / scale);
+                        graphics.pose().scale(1 / scale, 1 / scale);
                     }
                 }
 
                 if (ModConfig.showUndertaleBossbars) {
                     // black outline
-                    context.renderOutline(x - 1, y - 1, BAR_WIDTH + 2, rectangleHeight + 2, 0xFF000000);
+                    graphics.outline(x - 1, y - 1, BAR_WIDTH + 2, rectangleHeight + 2, 0xFF000000);
                 }
             }
         }
