@@ -10,5 +10,11 @@
     "sounds": [
       "undertale_healthbars:snd_heal"
     ]
+  },
+  "snd_vaporized": {
+    "subtitle": "sound.undertale_healthbars.snd_vaporized",
+    "sounds": [
+      "undertale_healthbars:snd_vaporized"
+    ]
   }
 }

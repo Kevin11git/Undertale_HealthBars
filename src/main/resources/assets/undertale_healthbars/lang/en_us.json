@@ -1,6 +1,7 @@
 {
     "sound.undertale_healthbars.snd_damage": "Undertale Damage",
     "sound.undertale_healthbars.snd_heal": "Undertale Heal",
+    "sound.undertale_healthbars.snd_vaporized": "Undertale Vaporized",
 
     "config.undertale_healthbars.title": "Undertale HealthBars Configuration",
 
@@ -45,6 +46,11 @@
     "config.undertale_healthbars.option.showUndertaleBossbarHealNumbers": "Show Bossbar Heal Numbers",
     "config.undertale_healthbars.option.showUndertaleBossbarHealNumbers.description": "Shows heals the boss gets to the right of the BossBar\n\nMIGHT NOT BE ACCURATE IF YOU ARE USING A MODDED ENDER DRAGON OR WITHER!",
 
+    "config.undertale_healthbars.category.extras": "Extras",
+    "config.undertale_healthbars.option.vaporizedSoundVolume": "Dust Sound Volume",
+    "config.undertale_healthbars.option.vaporizedSoundVolume.description": "Volume of Undertale vaporized dust sound that plays when an entity dies.\nSet it to 0 to turn off.\nNOTE: This sound might not play on players which respawn immediately\n\nThis FEACHER was suggested by @buddie.ase on Discord!",
+    "config.undertale_healthbars.option.vaporizedSoundForYourself": "Play Dust Sound for Yourself",
+    "config.undertale_healthbars.option.vaporizedSoundForYourself.description": "Enable this to play Undertale vaporized dust sound when you die",
 
     "key.category.undertale_healthbars.undertale_healthbars": "Undertale HealthBars",
     "key.undertale_healthbars.toggleMod": "Toggle Mod",

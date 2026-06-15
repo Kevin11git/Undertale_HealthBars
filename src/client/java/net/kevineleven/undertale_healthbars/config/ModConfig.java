@@ -12,8 +12,10 @@ import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 
 
@@ -118,6 +120,7 @@ public class ModConfig {
 
 
                 .build());
+
                 builder.category(ConfigCategory.createBuilder()
                         .name(Component.translatable("config.undertale_healthbars.category.sounds"))
 
@@ -125,14 +128,14 @@ public class ModConfig {
                                 .name(Component.translatable("config.undertale_healthbars.option.damageSoundVolume"))
                                 .description(OptionDescription.of(Component.translatable("config.undertale_healthbars.option.damageSoundVolume.description")))
                                 .binding(100, () -> damageSoundVolume, newVal -> damageSoundVolume = newVal)
-                                .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 100).step(1).formatValue(val -> Component.literal(val + "%")))
+                                .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 100).step(1).formatValue(ModConfig::formatVolume))
                         .build())
 
                         .option(Option.<Integer>createBuilder()
                                 .name(Component.translatable("config.undertale_healthbars.option.healSoundVolume"))
                                 .description(OptionDescription.of(Component.translatable("config.undertale_healthbars.option.healSoundVolume.description")))
                                 .binding(100, () -> healSoundVolume, newVal -> healSoundVolume = newVal)
-                                .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 100).step(1).formatValue(val -> Component.literal(val + "%")))
+                                .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 100).step(1).formatValue(ModConfig::formatVolume))
                         .build())
 
 
@@ -192,10 +195,35 @@ public class ModConfig {
                         .build())
                 .build());
 
+                builder.category(ConfigCategory.createBuilder()
+                        .name(Component.translatable("config.undertale_healthbars.category.extras"))
+
+                        .option(Option.<Integer>createBuilder()
+                                .name(Component.translatable("config.undertale_healthbars.option.vaporizedSoundVolume"))
+                                .description(OptionDescription.of(Component.translatable("config.undertale_healthbars.option.vaporizedSoundVolume.description")))
+                                .binding(0, () -> vaporizedSoundVolume, newVal -> vaporizedSoundVolume = newVal)
+                                .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 100).step(1).formatValue(ModConfig::formatVolume))
+                        .build())
+
+                        .option(Option.<Boolean>createBuilder()
+                                .name(Component.translatable("config.undertale_healthbars.option.vaporizedSoundForYourself"))
+                                .description(OptionDescription.of(Component.translatable("config.undertale_healthbars.option.vaporizedSoundForYourself.description")))
+                                .binding(false, () -> vaporizedSoundForYourself, newVal -> vaporizedSoundForYourself = newVal)
+                                .controller(opt -> BooleanControllerBuilder.create(opt).valueFormatter(val -> val ? Component.literal("Yes") : Component.literal("No")).coloured(true))
+                        .build())
+
+                .build());
+
             builder.build();
 
             return builder;
         }).generateScreen(parent);
+    }
+
+    private static MutableComponent formatVolume(int val) {
+        return val > 0 ?
+                Component.literal(val + "%").withStyle(ChatFormatting.GREEN) :
+                Component.literal("0% (Off)").withStyle(ChatFormatting.RED);
     }
 
     // Rendering
@@ -237,4 +265,10 @@ public class ModConfig {
     public static boolean showUndertaleBossbarDamageNumbers = true;
     @SerialEntry
     public static boolean showUndertaleBossbarHealNumbers = true;
+
+    // Extras
+    @SerialEntry
+    public static int vaporizedSoundVolume = 0;
+    @SerialEntry
+    public static boolean vaporizedSoundForYourself = false;
 }

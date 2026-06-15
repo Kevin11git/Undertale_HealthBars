@@ -54,18 +54,30 @@ public abstract class LivingEntityDamageMixin {
                 SoundManager soundManager = client.getSoundManager();
 
                 if (ModConfig.modEnabled) {
-                    if (damage < 0 && (!isCurrentPlayer || ModConfig.healSoundForYourself)) {
+                    // Playing snd_heal
+                    if (damage < 0 && (!isCurrentPlayer || ModConfig.healSoundForYourself) && ModConfig.healSoundVolume > 0) {
                         soundManager.play(new SimpleSoundInstance(
                                 ModSounds.HEAL,
                                 SoundSource.MASTER,
                                 (float) (ModConfig.healSoundVolume) / 100, 1f, RandomSource.create(),
                                 entity.blockPosition()
                         ));
-                    } else if (damage > 0 && (!isCurrentPlayer || ModConfig.damageSoundForYourself)) {
+                    // Playing snd_damage
+                    } else if (damage > 0 && (!isCurrentPlayer || ModConfig.damageSoundForYourself) && ModConfig.damageSoundVolume > 0) {
                         soundManager.play(new SimpleSoundInstance(
                                 ModSounds.DAMAGE,
                                 SoundSource.MASTER,
                                 (float) (ModConfig.damageSoundVolume) / 100, 1f, RandomSource.create(),
+                                entity.blockPosition()
+                        ));
+                    }
+
+                    // Playing snd_vaporized
+                    if (newHealth == 0f && (!isCurrentPlayer || ModConfig.vaporizedSoundForYourself) && ModConfig.vaporizedSoundVolume > 0) {
+                        soundManager.play(new SimpleSoundInstance(
+                                ModSounds.VAPORIZED,
+                                SoundSource.MASTER,
+                                (float) (ModConfig.vaporizedSoundVolume) / 100, 1f, RandomSource.create(),
                                 entity.blockPosition()
                         ));
                     }
@@ -88,8 +100,7 @@ public abstract class LivingEntityDamageMixin {
 
     @Unique
     private boolean shouldRenderForLivingEntity(LivingEntity livingEntity) {
-        return !livingEntity.isInvisibleTo(UndertaleHealthBarsClient.client.player) &&
-                (livingEntity.isAlive() || previousHealths.containsKey(livingEntity))
+        return (livingEntity.isAlive() || previousHealths.containsKey(livingEntity))
                 ;
     }
 }

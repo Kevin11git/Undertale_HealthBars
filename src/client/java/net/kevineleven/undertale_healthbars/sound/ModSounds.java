@@ -13,6 +13,7 @@ public class ModSounds {
 
     public static final SoundEvent DAMAGE = registerSound("snd_damage");
     public static final SoundEvent HEAL = registerSound("snd_heal");
+    public static final SoundEvent VAPORIZED = registerSound("snd_vaporized");
 
     private static SoundEvent registerSound(String id) {
         Identifier identifier = Identifier.fromNamespaceAndPath(UndertaleHealthBarsClient.MOD_ID, id);
