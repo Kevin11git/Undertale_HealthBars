@@ -1,9 +1,12 @@
 package net.kevineleven.undertale_healthbars.mixin;
 
+import com.mojang.math.Axis;
 import net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient;
 import net.kevineleven.undertale_healthbars.config.ModConfig;
 import net.kevineleven.undertale_healthbars.util.DamageInfo;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -13,6 +16,11 @@ import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.CommonColors;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.scores.DisplaySlot;
@@ -107,18 +115,22 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         }
 
 
+        float x = 0.0f;
+        float y = 0.0f;
+        float z = 0.0f;
+
         if (damageInfos.containsKey(livingEntity) || ModConfig.alwaysShowHealthbar) {
 
             Minecraft client = Minecraft.getInstance();
 
             poseStack.pushPose();
 
-            float x = 0.0f;
-            float y = 0.0f;
-            float z = 0.0f;
+            x = 0.0f;
+            y = 0.0f;
+            z = 0.0f;
 
             double d = livingEntity.distanceTo(client.getCameraEntity());
-            poseStack.translate(x, y + livingEntity.getBbHeight() + 0.5f + ModConfig.healthbarOffset, z);
+            poseStack.translate(x, y + livingEntity.getBbHeight() + 0.5f + ModConfig.healthbarOffset, 0);
             if ((livingEntity.hasCustomName() && d <= 4096.0) || (livingEntity instanceof Player)) {
                 poseStack.translate(0.0D, 9.0F * 1.15F * 0.025F, 0.0D);
 
@@ -132,9 +144,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
             assert this.entityRenderDispatcher.camera != null;
             poseStack.mulPose(this.entityRenderDispatcher.camera.rotation());
+            poseStack.mulPose(Axis.XP.rotationDegrees(180));
+            poseStack.translate(0f,0f,z);
 
-            poseStack.scale(-1, 1, 1);
-
+            // -------- DRAWING HEALTHBAR --------
             if (ModConfig.showHealthbar && (damageInfos.containsKey(livingEntity) || ModConfig.alwaysShowHealthbar)) {
 
                 float width = 2.5f;
@@ -142,28 +155,46 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                 float healthPercent = Math.max(0.0f, previousHealth) / livingEntity.getMaxHealth();
                 healthPercent = Math.min(healthPercent, 1.0f); // make sure health bar doesn't go above 100%
 
-                drawQuad(poseStack, submitNodeCollector, 0, 0, -0.01f, width + 0.01f, height + 0.01f, 0f, 0f, 0f, 1.0f);
+                drawQuad(poseStack, submitNodeCollector, 0, 0, 0.001f, width + 0.02f, height + 0.02f, 0f, 0f, 0f, 1.0f);
                 drawQuad(poseStack, submitNodeCollector, 0, 0, 0, width, height, 0.25f, 0.25f, 0.25f, 1);
                 float healthWidth = width * healthPercent;
 
 
-                float healthOffset = -((healthWidth / 2) - (width / 2));
-                drawQuad(poseStack, submitNodeCollector, healthOffset, 0, 0.001f, healthWidth, height, 0, 0.84f, 0, 1.0f);
-
-
-                // Might add health number/percent text later
-//                TextRenderer textRenderer = client.textRenderer;
-//                matrixStack.scale(0.1f,0.1f,0.1f);
-//                matrixStack.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
-//                String text = String.format("%.1f", livingEntity.getHealth());
-//
-//                matrixStack.translate(-((float) (textRenderer.getWidth(text)) / 2), 1 * -10, 0);
-//
-//
-//
-//                textRenderer.draw(text, 0f, 0, 0xFF0000, false, model, client.getBufferBuilders().getEntityVertexConsumers(), TextRenderer.TextLayerType.NORMAL, 0x000000, 15);
+                float healthOffset = ((healthWidth / 2) - (width / 2));
+                drawQuad(poseStack, submitNodeCollector, healthOffset, 0, -0.001f, healthWidth, height, 0, 0.84f, 0, 1.0f);
             }
 
+            //   -------- DRAWING HEALTH NUMBERS --------
+            float scale = 0.026f;
+            x = 0;
+            y = -0.165f;
+            z = -0.2f;
+            poseStack.scale(scale, scale, scale);
+            poseStack.translate(0,0,z);
+
+            Font client_font = UndertaleHealthBarsClient.client.font;
+            FontDescription font = new FontDescription.Resource(Identifier.fromNamespaceAndPath(UndertaleHealthBarsClient.MOD_ID, "crypt_of_tomorrow"));
+            float health_percent = livingEntity.getHealth() / livingEntity.getMaxHealth();
+            String text = formatFloat(livingEntity.getHealth()) + "/" + formatFloat(livingEntity.getMaxHealth());
+            MutableComponent component = Component.literal(text).withStyle(Style.EMPTY.withFont(font));
+
+            if (health_percent < .5) {
+                component = component.withStyle( ChatFormatting.YELLOW);
+            }
+            if (health_percent < .25) {
+                component = component.withStyle( ChatFormatting.RED);
+            }
+
+
+            x -= (client_font.width(component) * scale) / 2f;
+            int font_color = CommonColors.WHITE;
+            int outlineColor = CommonColors.BLACK;
+            submitNodeCollector.submitText(poseStack, (1f/scale) * (x),(1f/scale) * (y), component.getVisualOrderText(), false, Font.DisplayMode.NORMAL, 15728880, font_color,16777215, outlineColor);
+
+            poseStack.translate(0,0,-z);
+            poseStack.scale(1f/scale, 1f/scale, 1f/scale);
+
+            // -------- DRAWING DAMAGE/HEAL NUMBERS --------
             if (damageInfos.containsKey(livingEntity)) {
 
                 DamageInfo damageInfo = damageInfos.get(livingEntity);
@@ -178,16 +209,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                         (damage_or_heal == "damage" && ModConfig.showDamageNumbers) ||
                                 (damage_or_heal == "heal" && ModConfig.showHealNumbers)
                 ) {
-                    String textDamage;
-                    if (Math.floor(damage) == damage) {
-                        textDamage = String.format("%.0f", damage);
-                    } else {
-                        textDamage = String.format("%.2f", damage);
-                    }
-
+                    String textDamage = formatFloat(damage);
                     poseStack.scale(0.5f, 0.5f, 0.5f);
 
-                    x = ((textDamage.length() - 1f) * 1.1f) / 2f;
+                    x = ((textDamage.length() - 1f) * -1.1f) / 2f;
                     Identifier texture;
                     for (int index = 0; index < textDamage.length(); index++) {
                         char currentChar = textDamage.charAt(index);
@@ -195,9 +220,9 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                             currentChar = '.';
                         }
                         texture = Identifier.fromNamespaceAndPath(UndertaleHealthBarsClient.MOD_ID, "textures/ui/" + damage_or_heal + "_num_" + currentChar + ".png");
-                        drawDamageNumber(poseStack, submitNodeCollector, texture, x, 1f + damageInfo.y_offset, 0, 1, 1, 1, 1);
+                        drawDamageNumber(poseStack, submitNodeCollector, texture, x, -1f - damageInfo.y_offset, 0, 1, 1, 1, 1);
 
-                        x -= 1.1f;
+                        x += 1.1f;
                     }
                 }
 
@@ -206,6 +231,14 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
             poseStack.popPose();
         }
 
+    }
+
+    private String formatFloat(float number) {
+        String output = String.format("%.2f", number);
+        if (output.endsWith(".00")) {
+            output = String.format("%.0f", number);
+        }
+        return output;
     }
 
 
@@ -250,13 +283,13 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
             Matrix4f model = matricesEntry.pose();
 
             // Bottom Left <v
-            buffer.addVertex(model, x + (width / 2), (y - height) + (height / 2), z).setUv(0, textureHeight).setLight(15728880).setColor(1f, 1f, 1f, 1f);
+            buffer.addVertex(model, x + (width / 2), (y - height) + (height / 2), z).setUv(textureWidth, 0).setLight(15728880).setColor(1f, 1f, 1f, 1f);
             // Bottom Right >v
-            buffer.addVertex(model, (x - width) + (width / 2), (y - height) + (height / 2), z).setUv(textureWidth, textureHeight).setLight(15728880).setColor(1f, 1f, 1f, 1f);
+            buffer.addVertex(model, (x - width) + (width / 2), (y - height) + (height / 2), z).setUv(0, 0).setLight(15728880).setColor(1f, 1f, 1f, 1f);
             // Top Right >^
-            buffer.addVertex(model, (x - width) + (width / 2), y + (height / 2), z).setUv(textureWidth, 0).setLight(15728880).setColor(1f, 1f, 1f, 1f);
+            buffer.addVertex(model, (x - width) + (width / 2), y + (height / 2), z).setUv(0, textureHeight).setLight(15728880).setColor(1f, 1f, 1f, 1f);
             // Top Left <^
-            buffer.addVertex(model, x + (width / 2), y + (height / 2), z).setUv(0, 0).setLight(15728880).setColor(1f, 1f, 1f, 1f);
+            buffer.addVertex(model, x + (width / 2), y + (height / 2), z).setUv(textureWidth, textureHeight).setLight(15728880).setColor(1f, 1f, 1f, 1f);
         });
     }
 

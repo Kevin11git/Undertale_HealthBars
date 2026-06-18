@@ -55,7 +55,7 @@ public abstract class LivingEntityDamageMixin {
 
                 if (ModConfig.modEnabled) {
                     // Playing snd_heal
-                    if (damage < 0 && (!isCurrentPlayer || ModConfig.healSoundForYourself) && ModConfig.healSoundVolume > 0) {
+                    if (damage < 0 && (!isCurrentPlayer || ModConfig.healSoundForYourself) && ModConfig.healSoundVolume > 0  && (isCurrentPlayer || !entity.isInvisibleTo(UndertaleHealthBarsClient.client.player))) {
                         soundManager.play(new SimpleSoundInstance(
                                 ModSounds.HEAL,
                                 SoundSource.MASTER,
