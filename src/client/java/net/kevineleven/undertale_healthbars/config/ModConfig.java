@@ -18,32 +18,31 @@ import net.minecraft.resources.Identifier;
 
 
 public class ModConfig {
+    public enum HealthNumberDisplayType {
+        HEALTH_AND_MAX_HEALTH,
+        HEALTH_ONLY,
+        PERCENTAGE
+    }
 
     public static final float MAXIMUM_MAX_DISTANCE = 100f;
 
-
-        public static ConfigClassHandler<ModConfig> HANDLER = ConfigClassHandler.createBuilder(ModConfig.class)
-                .id(Identifier.fromNamespaceAndPath(UndertaleHealthBarsClient.MOD_ID, "config"))
-                .serializer(config -> GsonConfigSerializerBuilder.create(config)
-                        .setPath(FabricLoader.getInstance().getConfigDir().resolve("undertale_healthbars.json5"))
-                        .appendGsonBuilder(GsonBuilder::setPrettyPrinting)
-                        .setJson5(true)
-                        .build()
-                )
+    public static ConfigClassHandler<ModConfig> HANDLER = ConfigClassHandler.createBuilder(ModConfig.class)
+            .id(Identifier.fromNamespaceAndPath(UndertaleHealthBarsClient.MOD_ID, "config"))
+            .serializer(config -> GsonConfigSerializerBuilder.create(config)
+                    .setPath(FabricLoader.getInstance().getConfigDir().resolve("undertale_healthbars.json5"))
+                    .appendGsonBuilder(GsonBuilder::setPrettyPrinting)
+                    .setJson5(true)
+                    .build()
+            )
                 .build();
 
     public static Screen getScreen(Screen parent) {
-        var optAlwaysShowHealthbar = optBoolean(alwaysShowHealthbar, false, "alwaysShowHealthbar").build();
-
         return YetAnotherConfigLib.create(ModConfig.HANDLER, (defaults, config, builder) -> {
                 builder.title(Component.translatable("config.undertale_healthbars.title"));
                 builder.category(ConfigCategory.createBuilder()
                         .name(Component.translatable("config.undertale_healthbars.category.rendering"))
                         .option(optBoolean(modEnabled, true, "modEnabled").build())
-                        .option(optBoolean(showHealthbar, true, "showHealthbar")
-                                .listener(((opt, val) -> {optAlwaysShowHealthbar.setAvailable(val);})).build())
-                        .option(optAlwaysShowHealthbar)
-
+                        .option(optBoolean(alwaysShow, false, "alwaysShow").build())
                         .option(optFloatSlider(maxDistance, "maxDistance", MAXIMUM_MAX_DISTANCE, 0.5f, MAXIMUM_MAX_DISTANCE, 0.5f,
                             val -> (val >= MAXIMUM_MAX_DISTANCE
                                     ? Component.literal("Infinite")
@@ -51,11 +50,17 @@ public class ModConfig {
                             ) // Format to show infinite if max distance, else show distance in blocks
                         ).build())
 
-                        .option(optFloat(damageHealNumbersShowDuration, 1f, "damageHealNumbersShowDuration", ModConfig::formatInTime).build())
+                        .option(optBoolean(showHealthbar, true, "showHealthbar").build())
                         .option(optBoolean(showDamageNumbers, true, "showDamageNumbers").build())
                         .option(optBoolean(showHealNumbers, true, "showHealNumbers").build())
+                        .option(optFloat(damageHealNumbersShowDuration, 1f, "damageHealNumbersShowDuration", ModConfig::formatInTime).build())
                         .option(optFloat(YOffset, 0f, "YOffset", ModConfig::formatInBlocks).build())
                         .option(optFloat(ZOffset, 0f, "ZOffset", ModConfig::formatInBlocks).build())
+
+                        .option(optBoolean(showHealthNumber, false, "showHealthNumber").build())
+                        .option(optEnum(healthNumberDisplayType, HealthNumberDisplayType.HEALTH_AND_MAX_HEALTH, HealthNumberDisplayType.class,"healthNumberDisplayType").build())
+                        .option(optBoolean(coloredHealthNumber, false, "coloredHealthNumber").build())
+
                         .option(optBoolean(renderForYourself, false, "renderForYourself").build())
                 .build());
 
@@ -63,9 +68,9 @@ public class ModConfig {
                         .name(Component.translatable("config.undertale_healthbars.category.sounds"))
 
                         .option(optVolumeSlider(damageSoundVolume, 100, "damageSoundVolume").build())
-                        .option(optVolumeSlider(healSoundVolume, 100, "healSoundVolume").build())
-
                         .option(optBoolean(damageSoundForYourself, false, "damageSoundForYourself").build())
+
+                        .option(optVolumeSlider(healSoundVolume, 100, "healSoundVolume").build())
                         .option(optBoolean(healSoundForYourself, false, "healSoundForYourself").build())
 
                         .option(optVolumeSlider(vaporizedSoundVolume, 100, "vaporizedSoundVolume").build())
@@ -113,6 +118,7 @@ public class ModConfig {
                                 .coloured(true)
                 );
     }
+
     private static Option.Builder<Float> optFloat(Reference<Float> variable, float default_value, String translation_name, ValueFormatter<Float> formatter) {
         return Option.<Float>createBuilder()
                 .name(Component.translatable("config.undertale_healthbars.option." + translation_name))
@@ -129,6 +135,7 @@ public class ModConfig {
                 .binding(default_value, variable::get, variable::set)
                 .controller(opt -> FloatFieldControllerBuilder.create(opt));
     }
+
     private static Option.Builder<Float> optFloatSlider(Reference<Float> variable, String translation_name, float default_value, float min, float max, float step, ValueFormatter<Float> formatter) {
         return Option.<Float>createBuilder()
                 .name(Component.translatable("config.undertale_healthbars.option." + translation_name))
@@ -148,6 +155,7 @@ public class ModConfig {
                         .range(min, max).step(step)
                 );
     }
+
     private static Option.Builder<Integer> optInt(Reference<Integer> variable, int default_value, String translation_name, ValueFormatter<Integer> formatter) {
         return Option.<Integer>createBuilder()
                 .name(Component.translatable("config.undertale_healthbars.option." + translation_name))
@@ -164,6 +172,7 @@ public class ModConfig {
                 .binding(default_value, variable::get, variable::set)
                 .controller(opt -> IntegerFieldControllerBuilder.create(opt));
     }
+
     private static Option.Builder<Integer> optIntSlider(Reference<Integer> variable, int default_value, String translation_name, int min, int max, int step, ValueFormatter<Integer> formatter) {
         return Option.<Integer>createBuilder()
                 .name(Component.translatable("config.undertale_healthbars.option." + translation_name))
@@ -183,29 +192,48 @@ public class ModConfig {
                         .range(min, max).step(step)
                 );
     }
+
     private static Option.Builder<Integer> optVolumeSlider(Reference<Integer> variable, int default_value, String translation_name) {
         return optIntSlider(variable, default_value, translation_name, 0, 100, 1, ModConfig::formatVolume);
+    }
+
+    private static <T extends Enum<T>> Option.Builder<T> optEnum(Reference<T> variable, T default_value, Class<T> enum_class, String translation_name) {
+        return Option.<T>createBuilder()
+                .name(Component.translatable("config.undertale_healthbars.option." + translation_name))
+                .description(OptionDescription.of(Component.translatable("config.undertale_healthbars.option." + translation_name + ".description")))
+                .binding(default_value, variable::get, variable::set)
+                .controller(
+                        opt -> EnumControllerBuilder.create(opt)
+                                .enumClass(enum_class)
+                                .formatValue(val -> Component.translatable("config.undertale_healthbars.option." + translation_name + "." + val.name().toLowerCase()))
+                );
     }
 
     // Rendering
     @SerialEntry
     public static Reference<Boolean> modEnabled = new Reference<>(true);
     @SerialEntry
-    public static Reference<Boolean> showHealthbar = new Reference<>(true);
-    @SerialEntry
-    public static Reference<Boolean> alwaysShowHealthbar = new Reference<>(false);
+    public static Reference<Boolean> alwaysShow = new Reference<>(false);
     @SerialEntry
     public static Reference<Float> maxDistance = new Reference<>(MAXIMUM_MAX_DISTANCE);
     @SerialEntry
-    public static Reference<Float> damageHealNumbersShowDuration = new Reference<>(1f);
+    public static Reference<Boolean> showHealthbar = new Reference<>(true);
     @SerialEntry
     public static Reference<Boolean> showDamageNumbers = new Reference<>(true);
     @SerialEntry
     public static Reference<Boolean> showHealNumbers = new Reference<>(true);
     @SerialEntry
+    public static Reference<Float> damageHealNumbersShowDuration = new Reference<>(1f);
+    @SerialEntry
     public static Reference<Float> YOffset = new Reference<>(0f);
     @SerialEntry
     public static Reference<Float> ZOffset = new Reference<>(0f);
+    @SerialEntry
+    public static Reference<Boolean> showHealthNumber = new Reference<>(false);
+    @SerialEntry
+    public static Reference<HealthNumberDisplayType> healthNumberDisplayType = new Reference<>(HealthNumberDisplayType.HEALTH_AND_MAX_HEALTH);
+    @SerialEntry
+    public static Reference<Boolean> coloredHealthNumber = new Reference<>(false);
     @SerialEntry
     public static Reference<Boolean> renderForYourself = new Reference<>(false);
 
@@ -213,9 +241,9 @@ public class ModConfig {
     @SerialEntry
     public static Reference<Integer> damageSoundVolume = new Reference<>(100);
     @SerialEntry
-    public static Reference<Integer> healSoundVolume = new Reference<>(100);
-    @SerialEntry
     public static Reference<Boolean> damageSoundForYourself = new Reference<>(false);
+    @SerialEntry
+    public static Reference<Integer> healSoundVolume = new Reference<>(100);
     @SerialEntry
     public static Reference<Boolean> healSoundForYourself = new Reference<>(false);
     @SerialEntry

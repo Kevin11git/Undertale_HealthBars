@@ -119,7 +119,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         float y = 0.0f;
         float z = 0.0f;
 
-        if (damageInfos.containsKey(livingEntity) || ModConfig.alwaysShowHealthbar.get()) {
+        if (damageInfos.containsKey(livingEntity) || ModConfig.alwaysShow.get()) {
 
             Minecraft client = Minecraft.getInstance();
 
@@ -148,7 +148,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
             poseStack.translate(0f,0f,z);
 
             // -------- DRAWING HEALTHBAR --------
-            if (ModConfig.showHealthbar.get() && (damageInfos.containsKey(livingEntity) || ModConfig.alwaysShowHealthbar.get())) {
+            if (ModConfig.showHealthbar.get() && (damageInfos.containsKey(livingEntity) || ModConfig.alwaysShow.get())) {
 
                 float width = 2.5f;
                 float height = 0.25f;
@@ -165,34 +165,46 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
             }
 
             //   -------- DRAWING HEALTH NUMBERS --------
-            float scale = 0.026f;
-            x = 0;
-            y = -0.165f;
-            z = -0.2f;
-            poseStack.scale(scale, scale, scale);
-            poseStack.translate(0,0,z);
+            if (ModConfig.showHealthNumber.get()) {
+                float scale = 0.026f;
+                x = 0;
+                y = -0.165f;
+                z = -0.2f;
+                poseStack.scale(scale, scale, scale);
+                poseStack.translate(0, 0, z);
 
-            Font client_font = UndertaleHealthBarsClient.client.font;
-            FontDescription font = new FontDescription.Resource(Identifier.fromNamespaceAndPath(UndertaleHealthBarsClient.MOD_ID, "crypt_of_tomorrow"));
-            float health_percent = livingEntity.getHealth() / livingEntity.getMaxHealth();
-            String text = formatFloat(livingEntity.getHealth()) + "/" + formatFloat(livingEntity.getMaxHealth());
-            MutableComponent component = Component.literal(text).withStyle(Style.EMPTY.withFont(font));
+                Font client_font = UndertaleHealthBarsClient.client.font;
+                FontDescription font = new FontDescription.Resource(Identifier.fromNamespaceAndPath(UndertaleHealthBarsClient.MOD_ID, "crypt_of_tomorrow"));
+                float health_percent = livingEntity.getHealth() / livingEntity.getMaxHealth();
 
-            if (health_percent < .5) {
-                component = component.withStyle( ChatFormatting.YELLOW);
+                String text = "Error: " + ModConfig.healthNumberDisplayType.get();
+                switch (ModConfig.healthNumberDisplayType.get()) {
+                    case ModConfig.HealthNumberDisplayType.HEALTH_AND_MAX_HEALTH ->
+                            text = formatFloat(livingEntity.getHealth()) + "/" + formatFloat(livingEntity.getMaxHealth());
+                    case ModConfig.HealthNumberDisplayType.HEALTH_ONLY ->
+                            text = formatFloat(livingEntity.getHealth());
+                    case ModConfig.HealthNumberDisplayType.PERCENTAGE ->
+                            text = formatFloat(health_percent * 100) + "%";
+                }
+                MutableComponent component = Component.literal(text).withStyle(Style.EMPTY.withFont(font));
+
+                if (ModConfig.coloredHealthNumber.get()) {
+                    if (health_percent <= 0.5f) {
+                        component = component.withStyle(ChatFormatting.YELLOW);
+                    }
+                    if (health_percent <= 0.25f) {
+                        component = component.withStyle(ChatFormatting.RED);
+                    }
+                }
+
+                x -= (client_font.width(component) * scale) / 2f;
+                int font_color = CommonColors.WHITE;
+                int outlineColor = CommonColors.BLACK;
+                submitNodeCollector.submitText(poseStack, (1f / scale) * (x), (1f / scale) * (y), component.getVisualOrderText(), false, Font.DisplayMode.NORMAL, 15728880, font_color, 16777215, outlineColor);
+
+                poseStack.translate(0, 0, -z);
+                poseStack.scale(1f / scale, 1f / scale, 1f / scale);
             }
-            if (health_percent < .25) {
-                component = component.withStyle( ChatFormatting.RED);
-            }
-
-
-            x -= (client_font.width(component) * scale) / 2f;
-            int font_color = CommonColors.WHITE;
-            int outlineColor = CommonColors.BLACK;
-            submitNodeCollector.submitText(poseStack, (1f/scale) * (x),(1f/scale) * (y), component.getVisualOrderText(), false, Font.DisplayMode.NORMAL, 15728880, font_color,16777215, outlineColor);
-
-            poseStack.translate(0,0,-z);
-            poseStack.scale(1f/scale, 1f/scale, 1f/scale);
 
             // -------- DRAWING DAMAGE/HEAL NUMBERS --------
             if (damageInfos.containsKey(livingEntity)) {
