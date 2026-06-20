@@ -54,7 +54,8 @@ public class ModConfig {
                         .option(optFloat(damageHealNumbersShowDuration, 1f, "damageHealNumbersShowDuration", ModConfig::formatInTime).build())
                         .option(optBoolean(showDamageNumbers, true, "showDamageNumbers").build())
                         .option(optBoolean(showHealNumbers, true, "showHealNumbers").build())
-                        .option(optFloat(healthbarOffset, 0f, "healthbarOffset", ModConfig::formatInBlocks).build())
+                        .option(optFloat(YOffset, 0f, "YOffset", ModConfig::formatInBlocks).build())
+                        .option(optFloat(ZOffset, 0f, "ZOffset", ModConfig::formatInBlocks).build())
                         .option(optBoolean(renderForYourself, false, "renderForYourself").build())
                 .build());
 
@@ -202,7 +203,9 @@ public class ModConfig {
     @SerialEntry
     public static Reference<Boolean> showHealNumbers = new Reference<>(true);
     @SerialEntry
-    public static Reference<Float> healthbarOffset = new Reference<>(0f);
+    public static Reference<Float> YOffset = new Reference<>(0f);
+    @SerialEntry
+    public static Reference<Float> ZOffset = new Reference<>(0f);
     @SerialEntry
     public static Reference<Boolean> renderForYourself = new Reference<>(false);
 

@@ -127,10 +127,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
             x = 0.0f;
             y = 0.0f;
-            z = 0.0f;
+            z = -ModConfig.ZOffset.get(); // Negative so a positive number moves it closer to camera
 
             double d = livingEntity.distanceTo(client.getCameraEntity());
-            poseStack.translate(x, y + livingEntity.getBbHeight() + 0.5f + ModConfig.healthbarOffset.get(), 0);
+            poseStack.translate(x, y + livingEntity.getBbHeight() + 0.5f + ModConfig.YOffset.get(), 0);
             if ((livingEntity.hasCustomName() && d <= 4096.0) || (livingEntity instanceof Player)) {
                 poseStack.translate(0.0D, 9.0F * 1.15F * 0.025F, 0.0D);
 

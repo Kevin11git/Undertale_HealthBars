@@ -20,8 +20,10 @@
     "config.undertale_healthbars.option.showDamageNumbers.description": "If enabled, Entities will show a Undertale Styled Damage Number above their Healthbar when its damaged",
     "config.undertale_healthbars.option.showHealNumbers": "Show Heal Numbers",
     "config.undertale_healthbars.option.showHealNumbers.description": "If enabled, Entities will show a Undertale Styled Heal Number above their Healthbar when it heals",
-    "config.undertale_healthbars.option.healthbarOffset": "HealthBar Y Offset",
-    "config.undertale_healthbars.option.healthbarOffset.description": "Move the HealthBar and damage/heal number up or down from its default y position in blocks",
+    "config.undertale_healthbars.option.YOffset": "Y Offset",
+    "config.undertale_healthbars.option.YOffset.description": "Move everything up or down from its default y position in blocks",
+    "config.undertale_healthbars.option.ZOffset": "Z Offset",
+    "config.undertale_healthbars.option.ZOffset.description": "Move everything forward or backward from its default z position in blocks\nUseful if other healthbars/numbers are in the way\n\nEnter a positive number to move it towards you, and a negative number to move it away from you",
     "config.undertale_healthbars.option.renderForYourself": "Render for Yourself",
     "config.undertale_healthbars.option.renderForYourself.description": "Weather to show the HealthBar and damage numbers on your own player in F5 mode",
 
