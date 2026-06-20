@@ -6,6 +6,7 @@ import net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient;
 import net.kevineleven.undertale_healthbars.config.ModConfig;
 import net.kevineleven.undertale_healthbars.keybind.ModKeybinds;
 import net.kevineleven.undertale_healthbars.util.DamageInfo;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.LivingEntity;
@@ -26,7 +27,12 @@ public class EndClientTickEvent implements ClientTickEvents.EndTick {
             ModConfig.modEnabled.set(!ModConfig.modEnabled.get());
             ModConfig.HANDLER.save();
 
-            UndertaleHealthBarsClient.client.gui.setOverlayMessage(Component.nullToEmpty("Undertale HealthBars Mod " + (ModConfig.modEnabled.get() ? "Enabled" : "Disabled") + "!"), false);
+            UndertaleHealthBarsClient.client.gui.setOverlayMessage(Component.literal("Undertale HealthBars Mod ")
+                    .append(ModConfig.modEnabled.get() ?
+                    Component.literal("Enabled").withStyle(ChatFormatting.GREEN) :
+                    Component.literal("Disabled").withStyle(ChatFormatting.RED))
+                    .append("!")
+            , false);
         }
 
         if (ModKeybinds.OPEN_CONFIG.consumeClick()) {
