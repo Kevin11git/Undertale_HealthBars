@@ -19,8 +19,8 @@ public class LerpingBossEventMixin {
     private float removeLerpForEntityBossBars(float value, float min, float max, Operation<Float> original) {
         LerpingBossEvent bossBar = (LerpingBossEvent) (Object) this;
         if (isBossBarOfEntity(bossBar) &&
-           (ModConfig.showUndertaleBossbars || ModConfig.showUndertaleBossbarDamageNumbers || ModConfig.showUndertaleBossbarHealNumbers) &&
-                ModConfig.modEnabled
+           (ModConfig.showUndertaleBossbars.get() || ModConfig.showUndertaleBossbarDamageNumbers.get() || ModConfig.showUndertaleBossbarHealNumbers.get()) &&
+                ModConfig.modEnabled.get()
         ) {
             return 1f;
         } else {

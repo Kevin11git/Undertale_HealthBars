@@ -53,31 +53,31 @@ public abstract class LivingEntityDamageMixin {
                 float damage = oldHealth - newHealth;
                 SoundManager soundManager = client.getSoundManager();
 
-                if (ModConfig.modEnabled) {
+                if (ModConfig.modEnabled.get()) {
                     // Playing snd_heal
-                    if (damage < 0 && (!isCurrentPlayer || ModConfig.healSoundForYourself) && ModConfig.healSoundVolume > 0  && (isCurrentPlayer || !entity.isInvisibleTo(UndertaleHealthBarsClient.client.player))) {
+                    if (damage < 0 && (!isCurrentPlayer || ModConfig.healSoundForYourself.get()) && ModConfig.healSoundVolume.get() > 0  && (isCurrentPlayer || !entity.isInvisibleTo(UndertaleHealthBarsClient.client.player))) {
                         soundManager.play(new SimpleSoundInstance(
                                 ModSounds.HEAL,
                                 SoundSource.MASTER,
-                                (float) (ModConfig.healSoundVolume) / 100, 1f, RandomSource.create(),
+                                (float) (ModConfig.healSoundVolume.get()) / 100, 1f, RandomSource.create(),
                                 entity.blockPosition()
                         ));
                     // Playing snd_damage
-                    } else if (damage > 0 && (!isCurrentPlayer || ModConfig.damageSoundForYourself) && ModConfig.damageSoundVolume > 0) {
+                    } else if (damage > 0 && (!isCurrentPlayer || ModConfig.damageSoundForYourself.get()) && ModConfig.damageSoundVolume.get() > 0) {
                         soundManager.play(new SimpleSoundInstance(
                                 ModSounds.DAMAGE,
                                 SoundSource.MASTER,
-                                (float) (ModConfig.damageSoundVolume) / 100, 1f, RandomSource.create(),
+                                (float) (ModConfig.damageSoundVolume.get()) / 100, 1f, RandomSource.create(),
                                 entity.blockPosition()
                         ));
                     }
 
                     // Playing snd_vaporized
-                    if (newHealth == 0f && (!isCurrentPlayer || ModConfig.vaporizedSoundForYourself) && ModConfig.vaporizedSoundVolume > 0) {
+                    if (newHealth == 0f && (!isCurrentPlayer || ModConfig.vaporizedSoundForYourself.get()) && ModConfig.vaporizedSoundVolume.get() > 0) {
                         soundManager.play(new SimpleSoundInstance(
                                 ModSounds.VAPORIZED,
                                 SoundSource.MASTER,
-                                (float) (ModConfig.vaporizedSoundVolume) / 100, 1f, RandomSource.create(),
+                                (float) (ModConfig.vaporizedSoundVolume.get()) / 100, 1f, RandomSource.create(),
                                 entity.blockPosition()
                         ));
                     }
@@ -85,10 +85,10 @@ public abstract class LivingEntityDamageMixin {
 
 
                 if (
-                        (damage < 0 && ModConfig.showHealNumbers) ||
-                        (damage > 0 && ModConfig.showDamageNumbers)
+                        (damage < 0 && ModConfig.showHealNumbers.get()) ||
+                        (damage > 0 && ModConfig.showDamageNumbers.get())
                 ) {
-                    damageInfos.put(entity, new DamageInfo(damage, (int)(20f * ModConfig.damageHealNumbersShowDuration), 0.23f));
+                    damageInfos.put(entity, new DamageInfo(damage, (int)(20f * ModConfig.damageHealNumbersShowDuration.get()), 0.23f));
                 }
             }
             oldHealth = newHealth;

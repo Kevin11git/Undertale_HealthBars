@@ -101,14 +101,14 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         }
 
 
-        if (!(ModConfig.modEnabled)) {
+        if (!(ModConfig.modEnabled.get())) {
             return;
         }
 
         // Check if entity is within distance to show using the max distance config option
         double distanceToCamera = livingEntity.distanceTo(UndertaleHealthBarsClient.client.getCameraEntity());
-        if (ModConfig.maxDistance < ModConfig.MAXIMUM_MAX_DISTANCE) { // don't check if distance is infinite
-            if (distanceToCamera > ModConfig.maxDistance) {
+        if (ModConfig.maxDistance.get() < ModConfig.MAXIMUM_MAX_DISTANCE) { // don't check if distance is infinite
+            if (distanceToCamera > ModConfig.maxDistance.get()) {
                 // Entity is outside max distance, don't show Healthbar and damage numbers etc
                 return;
             }
@@ -119,7 +119,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         float y = 0.0f;
         float z = 0.0f;
 
-        if (damageInfos.containsKey(livingEntity) || ModConfig.alwaysShowHealthbar) {
+        if (damageInfos.containsKey(livingEntity) || ModConfig.alwaysShowHealthbar.get()) {
 
             Minecraft client = Minecraft.getInstance();
 
@@ -130,7 +130,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
             z = 0.0f;
 
             double d = livingEntity.distanceTo(client.getCameraEntity());
-            poseStack.translate(x, y + livingEntity.getBbHeight() + 0.5f + ModConfig.healthbarOffset, 0);
+            poseStack.translate(x, y + livingEntity.getBbHeight() + 0.5f + ModConfig.healthbarOffset.get(), 0);
             if ((livingEntity.hasCustomName() && d <= 4096.0) || (livingEntity instanceof Player)) {
                 poseStack.translate(0.0D, 9.0F * 1.15F * 0.025F, 0.0D);
 
@@ -148,7 +148,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
             poseStack.translate(0f,0f,z);
 
             // -------- DRAWING HEALTHBAR --------
-            if (ModConfig.showHealthbar && (damageInfos.containsKey(livingEntity) || ModConfig.alwaysShowHealthbar)) {
+            if (ModConfig.showHealthbar.get() && (damageInfos.containsKey(livingEntity) || ModConfig.alwaysShowHealthbar.get())) {
 
                 float width = 2.5f;
                 float height = 0.25f;
@@ -206,8 +206,8 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                 }
 
                 if (
-                        (damage_or_heal == "damage" && ModConfig.showDamageNumbers) ||
-                                (damage_or_heal == "heal" && ModConfig.showHealNumbers)
+                        (damage_or_heal == "damage" && ModConfig.showDamageNumbers.get()) ||
+                                (damage_or_heal == "heal" && ModConfig.showHealNumbers.get())
                 ) {
                     String textDamage = formatFloat(damage);
                     poseStack.scale(0.5f, 0.5f, 0.5f);
@@ -298,7 +298,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
     private boolean shouldRenderForLivingEntity(LivingEntity livingEntity) {
         boolean isCurrentPlayer = false;
 
-        if (livingEntity instanceof Player playerEntity && !ModConfig.renderForYourself) {
+        if (livingEntity instanceof Player playerEntity && !ModConfig.renderForYourself.get()) {
             if (UndertaleHealthBarsClient.client.player.equals(playerEntity)) {
                 isCurrentPlayer = true;
             }

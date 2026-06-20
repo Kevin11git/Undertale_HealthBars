@@ -23,10 +23,10 @@ public class EndClientTickEvent implements ClientTickEvents.EndTick {
     public void onEndTick(Minecraft client) {
         // Keybinds
         if (ModKeybinds.TOGGLE_MOD.consumeClick()) {
-            ModConfig.modEnabled = !ModConfig.modEnabled;
+            ModConfig.modEnabled.set(!ModConfig.modEnabled.get());
             ModConfig.HANDLER.save();
 
-            UndertaleHealthBarsClient.client.gui.setOverlayMessage(Component.nullToEmpty("Undertale HealthBars Mod " + (ModConfig.modEnabled ? "Enabled" : "Disabled") + "!"), false);
+            UndertaleHealthBarsClient.client.gui.setOverlayMessage(Component.nullToEmpty("Undertale HealthBars Mod " + (ModConfig.modEnabled.get() ? "Enabled" : "Disabled") + "!"), false);
         }
 
         if (ModKeybinds.OPEN_CONFIG.consumeClick()) {

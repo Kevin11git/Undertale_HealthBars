@@ -42,7 +42,7 @@ public class BossHealthOverlayMixin {
             at = @At(value = "RETURN")
     )
     private void renderBossBar(GuiGraphicsExtractor graphics, int x, int y, BossEvent bossBar, int width, Identifier[] sprites, Identifier[] overlaySprites, CallbackInfo ci) {
-        if (!(ModConfig.modEnabled)) {
+        if (!(ModConfig.modEnabled.get())) {
             return;
         }
 
@@ -64,10 +64,10 @@ public class BossHealthOverlayMixin {
                 if (newHealth != oldHealth) {
                     float damage = oldHealth - newHealth;
                     if (
-                            (damage < 0 && ModConfig.showUndertaleBossbarHealNumbers) ||
-                            (damage > 0 && ModConfig.showUndertaleBossbarDamageNumbers)
+                            (damage < 0 && ModConfig.showUndertaleBossbarHealNumbers.get()) ||
+                            (damage > 0 && ModConfig.showUndertaleBossbarDamageNumbers.get())
                     ) {
-                        bossDamageInfos.put(bossBar, new DamageInfo(damage, (int)(20f * ModConfig.bossbarsDamageHealNumbersShowDuration), 0.23f));
+                        bossDamageInfos.put(bossBar, new DamageInfo(damage, (int)(20f * ModConfig.bossbarsDamageHealNumbersShowDuration.get()), 0.23f));
                     }
 
                     oldHealths.replace(bossBar, newHealth);
@@ -95,13 +95,13 @@ public class BossHealthOverlayMixin {
                     previousHealth = bossPreviousHealths.get(bossBar);
                 }
 
-                if (ModConfig.showUndertaleBossbars) {
+                if (ModConfig.showUndertaleBossbars.get()) {
                     // gray background rect
                     graphics.fill(x, y, x + width, y + rectangleHeight, 0xFF404040);
                 }
 
             } else if (Arrays.equals(sprites, BAR_PROGRESS_SPRITES)) {
-                if (ModConfig.showUndertaleBossbars) {
+                if (ModConfig.showUndertaleBossbars.get()) {
                     // green health rect
                     graphics.fill(x, y, x + ((int) Math.ceil(Math.max(0.0f, previousHealth) * BAR_WIDTH)), y + rectangleHeight, 0xFF00D600);
                 }
@@ -117,8 +117,8 @@ public class BossHealthOverlayMixin {
                     }
 
                     if (
-                            (damage_or_heal == "damage" && ModConfig.showUndertaleBossbarDamageNumbers) ||
-                                    (damage_or_heal == "heal" && ModConfig.showUndertaleBossbarHealNumbers)
+                            (damage_or_heal == "damage" && ModConfig.showUndertaleBossbarDamageNumbers.get()) ||
+                                    (damage_or_heal == "heal" && ModConfig.showUndertaleBossbarHealNumbers.get())
                     ) {
 
                         String textDamage;
@@ -146,7 +146,7 @@ public class BossHealthOverlayMixin {
                     }
                 }
 
-                if (ModConfig.showUndertaleBossbars) {
+                if (ModConfig.showUndertaleBossbars.get()) {
                     // black outline
                     graphics.outline(x - 1, y - 1, BAR_WIDTH + 2, rectangleHeight + 2, 0xFF000000);
                 }
