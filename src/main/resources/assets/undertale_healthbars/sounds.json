@@ -5,6 +5,24 @@
       "undertale_healthbars:snd_damage"
     ]
   },
+  "snd_light_damage": {
+    "subtitle": "sound.undertale_healthbars.snd_light_damage",
+    "sounds": [
+      {
+        "name": "undertale_healthbars:snd_light_damage",
+        "attenuation_distance": 8
+      }
+    ]
+  },
+  "snd_heavy_damage": {
+    "subtitle": "sound.undertale_healthbars.snd_heavy_damage",
+    "sounds": [
+      {
+        "name": "undertale_healthbars:snd_heavy_damage",
+        "attenuation_distance": 24
+      }
+    ]
+  },
   "snd_heal": {
     "subtitle": "sound.undertale_healthbars.snd_heal",
     "sounds": [

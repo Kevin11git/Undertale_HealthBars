@@ -15,6 +15,8 @@ public class ModSounds {
     }
 
     public static final Identifier DAMAGE = registerSound("snd_damage");
+    public static final Identifier LIGHT_DAMAGE = registerSound("snd_light_damage");
+    public static final Identifier HEAVY_DAMAGE = registerSound("snd_heavy_damage");
     public static final Identifier HEAL = registerSound("snd_heal");
     public static final Identifier VAPORIZED = registerSound("snd_vaporized");
 
@@ -26,12 +28,12 @@ public class ModSounds {
         UndertaleHealthBarsClient.LOGGER.info("Registering " + UndertaleHealthBarsClient.MOD_ID + " Sounds");
     }
 
-    public static SoundEngine.PlayResult playSound(Identifier sound, float volume, float pitch, BlockPos location, float range) {
+    public static SoundEngine.PlayResult playSound(Identifier sound, float volume, float pitch, BlockPos location) {
         return UndertaleHealthBarsClient.client.getSoundManager().play(
                 new SimpleSoundInstance(
                         SoundEvent.createFixedRangeEvent(
                                 sound,
-                                range
+                                16f
                         ),
                         SoundSource.MASTER,
                         volume,
@@ -40,8 +42,5 @@ public class ModSounds {
                         location
                 )
         );
-    }
-    public static SoundEngine.PlayResult playSound(Identifier sound, float volume, float pitch, BlockPos location) {
-        return playSound(sound, volume, pitch, location, 16f); // 16 blocks is default range
     }
 }

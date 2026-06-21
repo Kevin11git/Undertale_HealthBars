@@ -2,6 +2,9 @@
     "sound.undertale_healthbars.snd_damage": "Undertale Damage",
     "sound.undertale_healthbars.snd_heal": "Undertale Heal",
     "sound.undertale_healthbars.snd_vaporized": "Undertale Vaporized",
+    "sound.undertale_healthbars.snd_light_damage": "Undertale Light Damage",
+    "sound.undertale_healthbars.snd_heavy_damage": "Undertale Heavy Damage",
+
 
     "config.undertale_healthbars.title": "Undertale HealthBars Configuration",
 
@@ -26,7 +29,6 @@
     "config.undertale_healthbars.option.ZOffset.description": "Move everything forward or backward from its default z position in blocks\nUseful if other healthbars/numbers are in the way\n\nEnter a positive number to move it towards you, and a negative number to move it away from you",
     "config.undertale_healthbars.option.showHealthNumber": "Show Health Number",
     "config.undertale_healthbars.option.showHealthNumber.description": "Shows/Hides the HP as a number showing above entities",
-
     "config.undertale_healthbars.option.healthNumberDisplayType": "Health Number Display Type",
     "config.undertale_healthbars.option.healthNumberDisplayType.description":
         "The format in which the Health Number is shown, Here are the options\n\n\nHealth and Max Health: Shows both the health and maximum health\nFor example: \"20/20\"\n\nHealth Only: Shows only the current health and not the max\nFor example: \"20\"\n\nPercentage: Shows health as a percentage from 0% to 100%\nFor example: \"100%\"",
@@ -41,17 +43,22 @@
 
     "config.undertale_healthbars.category.sounds": "Sounds",
     "config.undertale_healthbars.option.damageSoundVolume": "Damage Sound Volume",
-    "config.undertale_healthbars.option.damageSoundVolume.description": "Volume of Undertale damage sound.\nSet it to 0 to turn off",
-    "config.undertale_healthbars.option.healSoundVolume": "Heal Sound Volume",
-    "config.undertale_healthbars.option.healSoundVolume.description": "Volume of Undertale heal sound.\nSet it to 0 to turn off",
+    "config.undertale_healthbars.option.damageSoundVolume.description": "Volume of Undertale damage sound.\nSet it to 0 to turn off\nThis also sets the volume of the Light/Heavy Damage Sounds",
     "config.undertale_healthbars.option.damageSoundForYourself": "Play Damage Sound for Yourself",
     "config.undertale_healthbars.option.damageSoundForYourself.description": "Enable this to play Undertale damage sound when you get damaged",
+    "config.undertale_healthbars.option.lightDamageThreshold": "Light Damage Threshold",
+    "config.undertale_healthbars.option.lightDamageThreshold.description": "When an entity gets damaged, if the damage is less than or equal to this number, A lighter damage sound will play instead (The soul hurt sound from Undertale)\n\nThis FEACHER was suggested by @buddie.ase on Discord!",
+    "config.undertale_healthbars.option.heavyDamageThreshold": "Heavy Damage Threshold",
+    "config.undertale_healthbars.option.heavyDamageThreshold.description": "When an entity gets damaged, if the damage is higher than or equal to this number, A heavier version of the damage sound will play instead",
+    "config.undertale_healthbars.option.healSoundVolume": "Heal Sound Volume",
+    "config.undertale_healthbars.option.healSoundVolume.description": "Volume of Undertale heal sound.\nSet it to 0 to turn off",
     "config.undertale_healthbars.option.healSoundForYourself": "Play Heal Sound for Yourself",
     "config.undertale_healthbars.option.healSoundForYourself.description": "Enable this to play Undertale heal sound when you heal",
     "config.undertale_healthbars.option.vaporizedSoundVolume": "Dust Sound Volume",
     "config.undertale_healthbars.option.vaporizedSoundVolume.description": "Volume of Undertale vaporized dust sound that plays when an entity dies.\nSet it to 0 to turn off.\nNOTE: This sound might not play on players which respawn immediately\n\nThis FEACHER was suggested by @buddie.ase on Discord!",
     "config.undertale_healthbars.option.vaporizedSoundForYourself": "Play Dust Sound for Yourself",
     "config.undertale_healthbars.option.vaporizedSoundForYourself.description": "Enable this to play Undertale vaporized dust sound when you die",
+
 
     "config.undertale_healthbars.category.bossBars": "BossBars",
     "config.undertale_healthbars.option.showUndertaleBossbars": "Show Undertale Bossbars",
@@ -62,6 +69,7 @@
     "config.undertale_healthbars.option.showUndertaleBossbarDamageNumbers.description": "Shows damage the boss gets to the right of the BossBar\n\nMIGHT NOT BE ACCURATE IF YOU ARE USING A MODDED ENDER DRAGON OR WITHER!",
     "config.undertale_healthbars.option.showUndertaleBossbarHealNumbers": "Show Bossbar Heal Numbers",
     "config.undertale_healthbars.option.showUndertaleBossbarHealNumbers.description": "Shows heals the boss gets to the right of the BossBar\n\nMIGHT NOT BE ACCURATE IF YOU ARE USING A MODDED ENDER DRAGON OR WITHER!",
+
 
     "key.category.undertale_healthbars.undertale_healthbars": "Undertale HealthBars",
     "key.undertale_healthbars.toggleMod": "Toggle Mod",

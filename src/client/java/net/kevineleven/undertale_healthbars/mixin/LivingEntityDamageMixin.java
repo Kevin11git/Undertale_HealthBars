@@ -6,6 +6,7 @@ import net.kevineleven.undertale_healthbars.config.ModConfig;
 import net.kevineleven.undertale_healthbars.sound.ModSounds;
 import net.kevineleven.undertale_healthbars.util.DamageInfo;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
@@ -56,10 +57,18 @@ public abstract class LivingEntityDamageMixin {
                                 1f,
                                 entity.blockPosition()
                         );
-                    // Playing snd_damage
+                    // Playing either snd_damage, snd_light_damage or snd_heavy_damage
                     } else if (damage > 0 && (!isCurrentPlayer || ModConfig.damageSoundForYourself.get()) && ModConfig.damageSoundVolume.get() > 0) {
+                        // Check which damage sound to play
+                        Identifier damage_sound = ModSounds.DAMAGE;
+                        if (damage <= ModConfig.lightDamageThreshold.get()) {
+                            damage_sound = ModSounds.LIGHT_DAMAGE;
+                        } else if (damage >= ModConfig.heavyDamageThreshold.get()) {
+                            damage_sound = ModSounds.HEAVY_DAMAGE;
+                        }
+
                         ModSounds.playSound(
-                                ModSounds.DAMAGE,
+                                damage_sound,
                                 (float) (ModConfig.damageSoundVolume.get()) / 100,
                                 1f,
                                 entity.blockPosition()

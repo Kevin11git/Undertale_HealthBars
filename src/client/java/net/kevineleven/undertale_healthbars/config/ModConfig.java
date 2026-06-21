@@ -69,6 +69,8 @@ public class ModConfig {
 
                         .option(optVolumeSlider(damageSoundVolume, 100, "damageSoundVolume").build())
                         .option(optBoolean(damageSoundForYourself, false, "damageSoundForYourself").build())
+                        .option(optFloat(lightDamageThreshold, 0.9f, "lightDamageThreshold", val -> Component.literal("When Damage <= " + val)).build())
+                        .option(optFloat(heavyDamageThreshold, 19f, "heavyDamageThreshold", val -> Component.literal("When Damage >= " + val)).build())
 
                         .option(optVolumeSlider(healSoundVolume, 100, "healSoundVolume").build())
                         .option(optBoolean(healSoundForYourself, false, "healSoundForYourself").build())
@@ -242,6 +244,10 @@ public class ModConfig {
     public static Reference<Integer> damageSoundVolume = new Reference<>(100);
     @SerialEntry
     public static Reference<Boolean> damageSoundForYourself = new Reference<>(false);
+    @SerialEntry
+    public static Reference<Float> lightDamageThreshold = new Reference<>(0.9f);
+    @SerialEntry
+    public static Reference<Float> heavyDamageThreshold = new Reference<>(19f);
     @SerialEntry
     public static Reference<Integer> healSoundVolume = new Reference<>(100);
     @SerialEntry
