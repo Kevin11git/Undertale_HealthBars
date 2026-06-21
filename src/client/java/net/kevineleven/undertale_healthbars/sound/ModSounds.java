@@ -1,26 +1,47 @@
 package net.kevineleven.undertale_healthbars.sound;
 
 import net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.Registry;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.sounds.SoundEngine;
+import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 
 public class ModSounds {
     private ModSounds() {
         // private empty constructor to avoid accidental instantiation
     }
 
-    public static final SoundEvent DAMAGE = registerSound("snd_damage");
-    public static final SoundEvent HEAL = registerSound("snd_heal");
-    public static final SoundEvent VAPORIZED = registerSound("snd_vaporized");
+    public static final Identifier DAMAGE = registerSound("snd_damage");
+    public static final Identifier HEAL = registerSound("snd_heal");
+    public static final Identifier VAPORIZED = registerSound("snd_vaporized");
 
-    private static SoundEvent registerSound(String id) {
-        Identifier identifier = Identifier.fromNamespaceAndPath(UndertaleHealthBarsClient.MOD_ID, id);
-        return Registry.register(BuiltInRegistries.SOUND_EVENT, identifier, SoundEvent.createVariableRangeEvent(identifier));
+    private static Identifier registerSound(String id) {
+        return Identifier.fromNamespaceAndPath(UndertaleHealthBarsClient.MOD_ID, id);
     }
 
     public static void initialize() {
         UndertaleHealthBarsClient.LOGGER.info("Registering " + UndertaleHealthBarsClient.MOD_ID + " Sounds");
+    }
+
+    public static SoundEngine.PlayResult playSound(Identifier sound, float volume, float pitch, BlockPos location, float range) {
+        return UndertaleHealthBarsClient.client.getSoundManager().play(
+                new SimpleSoundInstance(
+                        SoundEvent.createFixedRangeEvent(
+                                sound,
+                                range
+                        ),
+                        SoundSource.MASTER,
+                        volume,
+                        pitch,
+                        RandomSource.create(),
+                        location
+                )
+        );
+    }
+    public static SoundEngine.PlayResult playSound(Identifier sound, float volume, float pitch, BlockPos location) {
+        return playSound(sound, volume, pitch, location, 16f); // 16 blocks is default range
     }
 }

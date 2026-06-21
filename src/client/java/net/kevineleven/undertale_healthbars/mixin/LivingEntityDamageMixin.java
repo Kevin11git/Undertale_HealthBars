@@ -6,12 +6,8 @@ import net.kevineleven.undertale_healthbars.config.ModConfig;
 import net.kevineleven.undertale_healthbars.sound.ModSounds;
 import net.kevineleven.undertale_healthbars.util.DamageInfo;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -51,35 +47,33 @@ public abstract class LivingEntityDamageMixin {
                 }
 
                 float damage = oldHealth - newHealth;
-                SoundManager soundManager = client.getSoundManager();
-
                 if (ModConfig.modEnabled.get()) {
                     // Playing snd_heal
                     if (damage < 0 && (!isCurrentPlayer || ModConfig.healSoundForYourself.get()) && ModConfig.healSoundVolume.get() > 0  && (isCurrentPlayer || !entity.isInvisibleTo(UndertaleHealthBarsClient.client.player))) {
-                        soundManager.play(new SimpleSoundInstance(
+                        ModSounds.playSound(
                                 ModSounds.HEAL,
-                                SoundSource.MASTER,
-                                (float) (ModConfig.healSoundVolume.get()) / 100, 1f, RandomSource.create(),
+                                (float) (ModConfig.healSoundVolume.get()) / 100,
+                                1f,
                                 entity.blockPosition()
-                        ));
+                        );
                     // Playing snd_damage
                     } else if (damage > 0 && (!isCurrentPlayer || ModConfig.damageSoundForYourself.get()) && ModConfig.damageSoundVolume.get() > 0) {
-                        soundManager.play(new SimpleSoundInstance(
+                        ModSounds.playSound(
                                 ModSounds.DAMAGE,
-                                SoundSource.MASTER,
-                                (float) (ModConfig.damageSoundVolume.get()) / 100, 1f, RandomSource.create(),
+                                (float) (ModConfig.damageSoundVolume.get()) / 100,
+                                1f,
                                 entity.blockPosition()
-                        ));
+                        );
                     }
 
                     // Playing snd_vaporized
                     if (newHealth == 0f && (!isCurrentPlayer || ModConfig.vaporizedSoundForYourself.get()) && ModConfig.vaporizedSoundVolume.get() > 0) {
-                        soundManager.play(new SimpleSoundInstance(
+                        ModSounds.playSound(
                                 ModSounds.VAPORIZED,
-                                SoundSource.MASTER,
-                                (float) (ModConfig.vaporizedSoundVolume.get()) / 100, 1f, RandomSource.create(),
+                                (float) (ModConfig.vaporizedSoundVolume.get()) / 100,
+                                1f,
                                 entity.blockPosition()
-                        ));
+                        );
                     }
                 }
 
