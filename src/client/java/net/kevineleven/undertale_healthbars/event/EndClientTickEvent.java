@@ -27,7 +27,7 @@ public class EndClientTickEvent implements ClientTickEvents.EndTick {
             ModConfig.modEnabled.set(!ModConfig.modEnabled.get());
             ModConfig.HANDLER.save();
 
-            UndertaleHealthBarsClient.client.gui.setOverlayMessage(Component.literal("Undertale HealthBars Mod ")
+            UndertaleHealthBarsClient.client.gui.hud.setOverlayMessage(Component.literal("Undertale HealthBars Mod ")
                     .append(ModConfig.modEnabled.get() ?
                     Component.literal("Enabled").withStyle(ChatFormatting.GREEN) :
                     Component.literal("Disabled").withStyle(ChatFormatting.RED))
@@ -36,8 +36,8 @@ public class EndClientTickEvent implements ClientTickEvents.EndTick {
         }
 
         if (ModKeybinds.OPEN_CONFIG.consumeClick()) {
-            Screen parent = UndertaleHealthBarsClient.client.screen;
-            UndertaleHealthBarsClient.client.setScreen(ModConfig.getScreen(parent));
+            Screen parent = UndertaleHealthBarsClient.client.gui.screen();
+            UndertaleHealthBarsClient.client.gui.setScreen(ModConfig.getScreen(parent));
         }
 
 
