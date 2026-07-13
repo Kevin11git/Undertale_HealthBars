@@ -6,12 +6,15 @@ import net.kevineleven.undertale_healthbars.config.ModConfig;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.Hud;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.CommonColors;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,8 +23,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Objects;
+
 @Mixin(Hud.class)
 public class HudMixin {
+
+    @Unique
+    final int NORMAL_HP_BAR_COLOR = 0xFFFBF236;
 
     @Inject(
             method = "extractHearts",
@@ -43,6 +51,32 @@ public class HudMixin {
         graphics.fill(x, y, x + width, y + height, outline_color);
         graphics.fill(x + outline_size, y + outline_size, x + width - outline_size, y + height - outline_size, 0xFFFF0000);
         graphics.fill(x + outline_size, y + outline_size, x + (int)((width - (outline_size * 2)) * healthPercent) + outline_size, y + height - outline_size, barColor);
+
+        // Damage estimation (like how karma shows in sans fight)
+        if (
+            player.hasEffect(MobEffects.POISON) ||
+            player.hasEffect(MobEffects.WITHER)
+        ) {
+            float damageEstimation = damageEstimation(player);
+            float healthEst = Math.max(player.getHealth() - damageEstimation, 0f);
+            if (healthEst <= 0 && !player.hasEffect(MobEffects.WITHER)) { // See how low health can be with poisSON
+                healthEst = (float) (player.getHealth() - Math.floor(player.getHealth()));
+                if (healthEst <= 0) // If health was whole number, poison damage will be to 1
+                    healthEst = 1;
+            }
+            float damage_est_percent = healthEst / player.getMaxHealth();
+            graphics.fill(x + outline_size, y + outline_size, x + (int)((width - (outline_size * 2)) * damage_est_percent) + outline_size, y + height - outline_size, NORMAL_HP_BAR_COLOR);
+        }
+        // Heal estimation from regeneration
+        if (player.hasEffect(MobEffects.REGENERATION)) {
+            float healEst = healEstimation(player);
+            float healthEst = Math.min(player.getHealth() + healEst, player.getMaxHealth());
+            if (healthEst > player.getHealth()) {
+                float healEstPercent = healthEst / player.getMaxHealth();
+                int heal_est_color = 0xFF5e5b17;
+                graphics.fill(x + (int) ((width - (outline_size * 2)) * healthPercent), y + outline_size, x + (int) ((width - (outline_size * 2)) * healEstPercent) + outline_size, y + height - outline_size, heal_est_color);
+            }
+        }
 
         // Second inner outline for hardcore mode
         if (isHardcore) {
@@ -98,10 +132,80 @@ public class HudMixin {
     @Unique
     private int getHpBarColor(Hud.HeartType type) {
          return switch (type) {
-            case POISIONED -> 0xFF37946E;
-            case WITHERED -> 0xFF765200;
-            case FROZEN -> 0xFF00d0ff           ;
-            default -> 0xFFFBF236; // NORMAL
+            case POISIONED -> 0xFFFF00FF;
+            case WITHERED -> 0xFF202020;
+            case FROZEN -> 0xFF00d0ff;
+            default -> NORMAL_HP_BAR_COLOR; // Yellow
         };
+    }
+
+    @Unique
+    private float damageEstimation(Player player) {
+        float dmg; // the output damage
+
+        double psnTime = getEffectDuration(player, MobEffects.POISON);
+        double psnLvl  = getEffectLevel(player, MobEffects.POISON) % 32; // leaves player 's HP at 1
+        double wthTime = getEffectDuration(player, MobEffects.WITHER);
+        double wthLvl  = getEffectLevel(player, MobEffects.WITHER) % 32; // can kill the player
+        double resTime = getEffectDuration(player, MobEffects.RESISTANCE);
+        double resLvl  = getEffectLevel(player, MobEffects.RESISTANCE) % 32;
+
+
+        if (psnLvl == 0)
+            psnTime = Math.floor(psnTime / 25);
+        else if (psnLvl==1)
+            psnTime = Math.floor(psnTime / 12);
+        else if (psnLvl==2)
+            psnTime = Math.floor(psnTime / 12); // technically it should be divided by 6 but iframes exist
+        else if (psnLvl==3)
+            psnTime = Math.floor(psnTime / 12); // should be 3 but ditto
+        else
+            psnTime = Math.floor(psnTime / 10); // should be 1 but ditto
+
+        if (wthLvl == 0)
+            wthTime = Math.floor(wthTime / 40);
+        else if (wthLvl==1)
+            wthTime = Math.floor(wthTime / 20);
+        else
+            wthTime = Math.floor(wthTime / 10); // lv2 -> 10 t, lv3 -> 5 t, lv4 -> 2 t, lv5 +->1 t, but iframes
+
+        dmg = (float) (psnTime + wthTime); // assuming player 's health is enough to deplete
+
+        if (resTime > 0)
+            return (float) Math.max(0, dmg * (1 - 0.2 * (resLvl + 1)));
+        else
+            return dmg;
+    }
+
+    @Unique
+    private float healEstimation(Player player) {
+        double heals = getEffectDuration(player, MobEffects.REGENERATION);
+        double eqLvl = getEffectLevel(player, MobEffects.REGENERATION) % 32;
+        if (eqLvl==0)
+            heals = Math.floor(heals/50);
+        else if (eqLvl==1)
+            heals = Math.floor(heals/25);
+        else if (eqLvl==2)
+            heals = Math.floor(heals/12);
+        else if (eqLvl==3)
+            heals = Math.floor(heals/6);
+        else if (eqLvl==4)
+            heals = Math.floor(heals/3);
+
+        return (float) heals;
+    }
+
+    // IN TICKS! (1 second = 20 ticks)
+    @Unique
+    private int getEffectDuration(LivingEntity livingEntity, Holder<MobEffect> effect) {
+        if (!livingEntity.hasEffect(effect)) return 0;
+
+        return Objects.requireNonNull(livingEntity.getEffect(effect)).getDuration();
+    }
+    @Unique
+    private int getEffectLevel(LivingEntity livingEntity, Holder<MobEffect> effect) {
+        if (!livingEntity.hasEffect(effect)) return -1;
+
+        return Objects.requireNonNull(livingEntity.getEffect(effect)).getAmplifier();
     }
 }
