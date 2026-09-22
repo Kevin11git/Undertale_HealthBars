@@ -17,7 +17,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,21 +25,17 @@ import static net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsCli
 
 @Mixin(BossBarHud.class)
 public class BossBarHudMixin {
-
-
-    @Shadow @Final private static Identifier[] BACKGROUND_TEXTURES;
-
     @Shadow @Final private static int WIDTH;
     @Shadow @Final private static int HEIGHT;
-    @Shadow @Final private static Identifier[] PROGRESS_TEXTURES;
+
     @Unique
     Map<BossBar, Float> oldHealths = new HashMap<>(); // for damage info
 
     @Inject(
-            method = "renderBossBar(Lnet/minecraft/client/gui/DrawContext;IILnet/minecraft/entity/boss/BossBar;I[Lnet/minecraft/util/Identifier;[Lnet/minecraft/util/Identifier;)V",
-            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V")
+            method = "renderBossBar(Lnet/minecraft/client/gui/DrawContext;IILnet/minecraft/entity/boss/BossBar;II)V",
+            at = @At(value = "RETURN")
     )
-    private void renderBossBar(DrawContext context, int x, int y, BossBar bossBar, int width, Identifier[] textures, Identifier[] notchedTextures, CallbackInfo ci) {
+    private void renderBossBar(DrawContext context, int x, int y, BossBar bossBar, int width, int height, CallbackInfo ci) {
         if (!(ModConfig.modEnabled)) {
             return;
         }
@@ -57,7 +52,8 @@ public class BossBarHudMixin {
 
             float previousHealth = bossPreviousHealths.get(bossBar);
 
-            if (Arrays.equals(textures, BACKGROUND_TEXTURES)){
+            if (bossBar.getStyle() == BossBar.Style.PROGRESS){
+
                 float oldHealth = oldHealths.get(bossBar);
                 float newHealth = bossBar.getPercent() * getMaxHealthFromBossBar(bossBar);
                 if (newHealth != oldHealth) {
@@ -99,7 +95,8 @@ public class BossBarHudMixin {
                     context.fill(x, y, x + width, y + rectangleHeight, 0xFF404040);
                 }
 
-            } else if (Arrays.equals(textures, PROGRESS_TEXTURES)) {
+            }
+            if (bossBar.getStyle() == BossBar.Style.PROGRESS) {
                 if (ModConfig.showUndertaleBossbars) {
                     // green health rect
                     context.fill(x, y, x + ((int) Math.ceil(Math.max(0.0f, previousHealth) * WIDTH)), y + rectangleHeight, 0xFF00D600);

@@ -9,11 +9,12 @@ import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
+import net.minecraft.client.render.entity.feature.FeatureRendererContext;
+import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.scoreboard.ScoreboardDisplaySlot;
+import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.Identifier;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,11 +25,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Objects;
 
-import static net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient.damageInfos;
-import static net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient.previousHealths;
+import static net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient.*;
 
 @Mixin(LivingEntityRenderer.class)
-public class LivingEntityRendererMixin extends EntityRenderer {
+public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extends EntityModel<T>> extends EntityRenderer<T> implements FeatureRendererContext<T, M> {
 
     protected LivingEntityRendererMixin(EntityRendererFactory.Context ctx) {
         super(ctx);
@@ -91,7 +91,7 @@ public class LivingEntityRendererMixin extends EntityRenderer {
 
                 if (livingEntity instanceof PlayerEntity playerEntity) {
 
-                    if (d < 100.0 && playerEntity.getScoreboard().getObjectiveForSlot(ScoreboardDisplaySlot.BELOW_NAME) != null) {
+                    if (d < 100.0 && playerEntity.getScoreboard().getObjectiveForSlot(Scoreboard.BELOW_NAME_DISPLAY_SLOT_ID) != null) {
                         matrixStack.translate(0.0D, 9.0F * 1.15F * 0.025F, 0.0D);
                     }
                 }
@@ -100,28 +100,28 @@ public class LivingEntityRendererMixin extends EntityRenderer {
 
             matrixStack.multiply(this.dispatcher.getRotation());
 
-            matrixStack.scale(-1, 1, 1);
-
             Matrix4f model = matrixStack.peek().getPositionMatrix();
             RenderSystem.enableDepthTest();
 
-            BufferBuilder buffer;
 
             RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+            Tessellator tessellator = Tessellator.getInstance();
+            BufferBuilder buffer = tessellator.getBuffer();
+
             if (ModConfig.showHealthbar && (damageInfos.containsKey(livingEntity) || ModConfig.alwaysShowHealthbar)) {
-                buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+                buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 
                 float width = 2.5f;
                 float height = 0.25f;
                 float healthPercent = Math.max(0.0f, previousHealth) / livingEntity.getMaxHealth();
 
-                drawQuad(model, buffer, 0, 0, -0.001f, width + 0.01f, height + 0.01f, 0f, 0f, 0f, 1);
+                drawQuad(model, buffer, 0, 0, 0.001f, width + 0.02f, height + 0.02f, 0f, 0f, 0f, 1);
                 drawQuad(model, buffer, 0, 0, 0, width, height, 0.25f, 0.25f, 0.25f, 1);
                 float healthWidth = width * healthPercent;
 
 
                 float healthOffset = -((healthWidth / 2) - (width / 2));
-                drawQuad(model, buffer, healthOffset, 0, 0.001f, healthWidth, height, 0, 0.84f, 0, 1);
+                drawQuad(model, buffer, healthOffset, 0, -0.001f, healthWidth, height, 0, 0.84f, 0, 1);
 
 
                 // Might add health number/percent text later
@@ -136,7 +136,7 @@ public class LivingEntityRendererMixin extends EntityRenderer {
 //
 //                textRenderer.draw(text, 0f, 0, 0xFF0000, false, model, client.getBufferBuilders().getEntityVertexConsumers(), TextRenderer.TextLayerType.NORMAL, 0x000000, 15);
 
-                BufferRenderer.drawWithGlobalProgram(buffer.end());
+                tessellator.draw();
             }
 
             if (damageInfos.containsKey(livingEntity)) {
@@ -165,7 +165,7 @@ public class LivingEntityRendererMixin extends EntityRenderer {
                     x = ((textDamage.length() - 1f) * 1.1f) / 2f;
                     Identifier texture;
                     for (int index = 0; index < textDamage.length(); index++) {
-                        buffer = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+                        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 
                         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
                         char currentChar = textDamage.charAt(index);
@@ -176,7 +176,7 @@ public class LivingEntityRendererMixin extends EntityRenderer {
 
                         RenderSystem.setShaderTexture(0, texture);
                         drawDamageNumber(model, buffer, x, 1f + damageInfo.y_offset, 0, 1, 1, 1, 1);
-                        BufferRenderer.drawWithGlobalProgram(buffer.end());
+                        tessellator.draw();
 
                         x -= 1.1f;
                     }
@@ -192,7 +192,7 @@ public class LivingEntityRendererMixin extends EntityRenderer {
 
 
     @Unique
-    private void drawQuad(Matrix4f model, BufferBuilder buffer,
+    private void drawQuad(Matrix4f model, VertexConsumer buffer,
                           float x,
                           float y,
                           float z,
@@ -204,16 +204,16 @@ public class LivingEntityRendererMixin extends EntityRenderer {
                           float a
     ) {
         // Bottom Left <v
-        buffer.vertex(model, x + (width / 2), (y - height) + (height / 2), z).color(r, g, b, a);
+        buffer.vertex(model, x + (width / 2), (y - height) + (height / 2), z).color(r, g, b, a).next();
         // Bottom Right >v
-        buffer.vertex(model, (x - width) + (width / 2), (y - height) + (height / 2), z).color(r, g, b, a);
+        buffer.vertex(model, (x - width) + (width / 2), (y - height) + (height / 2), z).color(r, g, b, a).next();
         // Top Right >^
-        buffer.vertex(model, (x - width) + (width / 2), y + (height / 2), z).color(r, g, b, a);
+        buffer.vertex(model, (x - width) + (width / 2), y + (height / 2), z).color(r, g, b, a).next();
         // Top Left <^
-        buffer.vertex(model, x + (width / 2), y + (height / 2), z).color(r, g, b, a);
+        buffer.vertex(model, x + (width / 2), y + (height / 2), z).color(r, g, b, a).next();
     }
     @Unique
-    private void drawDamageNumber(Matrix4f model, BufferBuilder buffer,
+    private void drawDamageNumber(Matrix4f model, VertexConsumer buffer,
                                   float x,
                                   float y,
                                   float z,
@@ -223,13 +223,13 @@ public class LivingEntityRendererMixin extends EntityRenderer {
                                   float textureHeight
     ) {
         // Bottom Left <v
-        buffer.vertex(model, x + (width / 2), (y - height) + (height / 2), z).texture(0, textureHeight);
+        buffer.vertex(model, x + (width / 2), (y - height) + (height / 2), z).texture(0, textureHeight).next();
         // Bottom Right >v
-        buffer.vertex(model, (x - width) + (width / 2), (y - height) + (height / 2), z).texture(textureWidth, textureHeight);
+        buffer.vertex(model, (x - width) + (width / 2), (y - height) + (height / 2), z).texture(textureWidth, textureHeight).next();
         // Top Right >^
-        buffer.vertex(model, (x - width) + (width / 2), y + (height / 2), z).texture(textureWidth, 0);
+        buffer.vertex(model, (x - width) + (width / 2), y + (height / 2), z).texture(textureWidth, 0).next();
         // Top Left <^
-        buffer.vertex(model, x  + (width / 2), y + (height / 2), z).texture(0, 0);
+        buffer.vertex(model, x  + (width / 2), y + (height / 2), z).texture(0, 0).next();
 
     }
 
@@ -239,14 +239,14 @@ public class LivingEntityRendererMixin extends EntityRenderer {
         boolean isCurrentPlayer = false;
 
         if (livingEntity instanceof PlayerEntity playerEntity && !ModConfig.renderForYourself) {
-            if (UndertaleHealthBarsClient.client.player.equals(playerEntity)) {
+            if (client.player.equals(playerEntity)) {
                 isCurrentPlayer = true;
             }
         }
 
 
 
-        return !livingEntity.isInvisibleTo(UndertaleHealthBarsClient.client.player) &&
+        return !livingEntity.isInvisibleTo(client.player) &&
                 (livingEntity.isAlive() || previousHealths.containsKey(livingEntity)) &&
                 !Objects.equals(livingEntity.getType().getName().getString(), "Armor Stand") &&
                 !isCurrentPlayer
@@ -257,10 +257,5 @@ public class LivingEntityRendererMixin extends EntityRenderer {
     float lerp(float a, float b, float f)
     {
         return a + ((b - a) * f);
-    }
-
-    @Override
-    public Identifier getTexture(Entity entity) {
-        return null;
     }
 }

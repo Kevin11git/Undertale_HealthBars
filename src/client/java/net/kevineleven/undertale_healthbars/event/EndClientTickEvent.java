@@ -15,8 +15,7 @@ import net.minecraft.text.Text;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient.bossDamageInfos;
-import static net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient.damageInfos;
+import static net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient.*;
 
 public class EndClientTickEvent implements ClientTickEvents.EndTick {
     @Override
