@@ -41,16 +41,16 @@ public class HudMixin {
         }
         int width = 9 * 9;
         int height = 9;
-        int outline_size = 1;
+        int outlineSize = 1;
 
         float healthPercent = player.getHealth() / player.getMaxHealth();
         int barColor = getHpBarColor(type);
-        int outline_color = 0xFF000000;
 
-        // black outline, empty rect, and filled rect
-        graphics.fill(x, y, x + width, y + height, outline_color);
-        graphics.fill(x + outline_size, y + outline_size, x + width - outline_size, y + height - outline_size, 0xFFFF0000);
-        graphics.fill(x + outline_size, y + outline_size, x + (int)((width - (outline_size * 2)) * healthPercent) + outline_size, y + height - outline_size, barColor);
+        float healthEst;
+        float healthEstPercent;
+
+        // DRAW THE MAIN HP BAR HEALTH BAR
+        drawBar(graphics, x, y, width, height, healthPercent, barColor, outlineSize, true, 0);
 
         // Damage estimation (like how karma shows in sans fight)
         if (
@@ -58,34 +58,52 @@ public class HudMixin {
             player.hasEffect(MobEffects.WITHER)
         ) {
             float damageEstimation = damageEstimation(player);
-            float healthEst = Math.max(player.getHealth() - damageEstimation, 0f);
+            healthEst = Math.max(player.getHealth() - damageEstimation, 0f);
             if (healthEst <= 0 && !player.hasEffect(MobEffects.WITHER)) { // See how low health can be with poisSON
                 healthEst = (float) (player.getHealth() - Math.floor(player.getHealth()));
                 if (healthEst <= 0) // If health was whole number, poison damage will be to 1
+                {
                     healthEst = 1;
+                }
             }
-            float damage_est_percent = healthEst / player.getMaxHealth();
-            graphics.fill(x + outline_size, y + outline_size, x + (int)((width - (outline_size * 2)) * damage_est_percent) + outline_size, y + height - outline_size, NORMAL_HP_BAR_COLOR);
+            healthEstPercent = healthEst / player.getMaxHealth();
+            drawBarScaled(-1, graphics, x, y, width, height, healthEstPercent, NORMAL_HP_BAR_COLOR, 0, false, 0);
         }
         // Heal estimation from regeneration
         if (player.hasEffect(MobEffects.REGENERATION)) {
             float healEst = healEstimation(player);
-            float healthEst = Math.min(player.getHealth() + healEst, player.getMaxHealth());
+            healthEst = Math.min(player.getHealth() + healEst, player.getMaxHealth());
             if (healthEst > player.getHealth()) {
-                float healEstPercent = healthEst / player.getMaxHealth();
-                int heal_est_color = 0xFF5e5b17;
-                graphics.fill(x + (int) ((width - (outline_size * 2)) * healthPercent), y + outline_size, x + (int) ((width - (outline_size * 2)) * healEstPercent) + outline_size, y + height - outline_size, heal_est_color);
+                healthEstPercent = healthEst / player.getMaxHealth();
+                int healEstColor = 0xFF5e5b17;
+                drawBarScaled(-1, graphics, x, y, width, height, healthEstPercent, healEstColor, 0, false, healthPercent);
             }
         }
 
         // Second inner outline for hardcore mode
         if (isHardcore) {
-            graphics.outline(x + outline_size, y + outline_size, width - (outline_size * 2), height - (outline_size * 2), 0xFF990000);
+            graphics.outline(x + outlineSize, y + outlineSize, width - (outlineSize * 2), height - (outlineSize * 2), 0xFF990000);
         }
 
         drawHpNumber(graphics, x - 1, y - 2, player);
 
         ci.cancel();
+    }
+
+    @Unique
+    private static void drawBarScaled(int scaleOffset, GuiGraphicsExtractor graphics, int x, int y, int width, int height, float percent, int color, int outline_size, boolean hasBg, float starting_percent) {
+        drawBar(graphics, x - scaleOffset, y - scaleOffset, width + (scaleOffset * 2), height  + (scaleOffset * 2), percent, color, outline_size, hasBg, starting_percent);
+    }
+    @Unique
+    private static void drawBar(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float percent, int color, int outline_size, boolean hasBg, float starting_percent) {
+        // black outline, red empty rect, and filled rect
+        if (outline_size > 0) {
+            graphics.fill(x, y, x + width, y + height, 0xFF000000);
+        }
+        if (hasBg) {
+            graphics.fill(x + outline_size, y + outline_size, x + width - outline_size, y + height - outline_size, 0xFFFF0000);
+        }
+        graphics.fill(x + (int)((width - (outline_size * 2)) * starting_percent) + outline_size, y + outline_size, x + (int)((width - (outline_size * 2)) * percent) + outline_size, y + height - outline_size, color);
     }
 
     @Unique
