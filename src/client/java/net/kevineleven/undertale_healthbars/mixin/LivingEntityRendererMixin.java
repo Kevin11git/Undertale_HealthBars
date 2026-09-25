@@ -1,6 +1,7 @@
 package net.kevineleven.undertale_healthbars.mixin;
 
 import com.mojang.math.Axis;
+import com.mojang.renderpearl.api.pipeline.*;
 import net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient;
 import net.kevineleven.undertale_healthbars.config.ModConfig;
 import net.kevineleven.undertale_healthbars.util.DamageInfo;
@@ -49,6 +50,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         implements RenderLayerParent<S, M> {
 
     @Unique private static final java.util.WeakHashMap<LivingEntityRenderState, LivingEntity> ENTITY_MAP = new java.util.WeakHashMap<>();
+    @Unique private static final float PIXEL_SIZE = 0.0123f;
 
     protected LivingEntityRendererMixin(EntityRendererProvider.Context context) {
         super(context);
@@ -143,8 +145,8 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
 
             assert this.entityRenderDispatcher.camera != null;
-            poseStack.mulPose(this.entityRenderDispatcher.camera.rotation());
-            poseStack.mulPose(Axis.XP.rotationDegrees(180));
+            poseStack.rotate(this.entityRenderDispatcher.camera.rotation());
+            poseStack.rotate(Axis.XP.rotationDegrees(180));
             poseStack.translate(0f,0f,z);
 
             // -------- DRAWING HEALTHBAR --------
@@ -155,13 +157,16 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                 float healthPercent = Math.max(0.0f, previousHealth) / livingEntity.getMaxHealth();
                 healthPercent = Math.min(healthPercent, 1.0f); // make sure health bar doesn't go above 100%
 
-                drawQuad(poseStack, submitNodeCollector, 0, 0, 0.001f, width + 0.02f, height + 0.02f, 0f, 0f, 0f, 1.0f);
-                drawQuad(poseStack, submitNodeCollector, 0, 0, 0, width, height, 0.25f, 0.25f, 0.25f, 1);
+                Identifier bar_texture_bg = Identifier.fromNamespaceAndPath(UndertaleHealthBarsClient.MOD_ID, "textures/ui/bars/bg.png");
+                Identifier bar_texture_filled = Identifier.fromNamespaceAndPath(UndertaleHealthBarsClient.MOD_ID, "textures/ui/bars/filled.png");
+
+                // Background
+                drawTextureQuad(poseStack, submitNodeCollector, bar_texture_bg, x, 0f, 0f, width + (PIXEL_SIZE * 2), height + (PIXEL_SIZE * 2), 1, 1);
+
+                // Filled
                 float healthWidth = width * healthPercent;
-
-
                 float healthOffset = ((healthWidth / 2) - (width / 2));
-                drawQuad(poseStack, submitNodeCollector, healthOffset, 0, -0.001f, healthWidth, height, 0, 0.84f, 0, 1.0f);
+                drawTextureQuad(poseStack, submitNodeCollector, bar_texture_filled, healthOffset, 0f, -0.001f, healthWidth, height, 1, 1);
             }
 
             //   -------- DRAWING HEALTH NUMBERS --------
@@ -232,7 +237,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                             currentChar = '.';
                         }
                         texture = Identifier.fromNamespaceAndPath(UndertaleHealthBarsClient.MOD_ID, "textures/ui/" + damage_or_heal + "_num_" + currentChar + ".png");
-                        drawDamageNumber(poseStack, submitNodeCollector, texture, x, -1f - damageInfo.y_offset, 0, 1, 1, 1, 1);
+                        drawTextureQuad(poseStack, submitNodeCollector, texture, x, -1f - damageInfo.y_offset, 0, 1, 1, 1, 1);
 
                         x += 1.1f;
                     }
@@ -266,8 +271,9 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                           float b,
                           float a
     ) {
-        // could also prob use RenderLayers.lightning(); if i dont want to specify light
-        queue.submitCustomGeometry(matrixStack, RenderTypes.textBackground(), (matricesEntry, buffer) -> {
+        // Sooo for some reason, RenderTypes.lightning() makes it translucent, and RenderTypes.textBackground() got removed....
+        // So i just switched to using a texture instead lol
+            queue.submitCustomGeometry(matrixStack, RenderTypes.lightning(), (matricesEntry, buffer) -> {
             Matrix4f model = matricesEntry.pose();
 
             // Bottom Left <v
@@ -281,7 +287,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         });
     }
     @Unique
-    private void drawDamageNumber(PoseStack matrixStack, SubmitNodeCollector queue, Identifier texture,
+    private void drawTextureQuad(PoseStack matrixStack, SubmitNodeCollector queue, Identifier texture,
                                   float x,
                                   float y,
                                   float z,

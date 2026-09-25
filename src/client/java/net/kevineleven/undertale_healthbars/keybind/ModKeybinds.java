@@ -5,7 +5,6 @@ import net.kevineleven.undertale_healthbars.client.UndertaleHealthBarsClient;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
 
 public class ModKeybinds {
     // CATEGORIES
@@ -13,11 +12,11 @@ public class ModKeybinds {
 
     // KEYBINDS
     public static final KeyMapping TOGGLE_MOD = registerKeybind(
-            "key.undertale_healthbars.toggleMod", GLFW.GLFW_KEY_UNKNOWN,
+            "key.undertale_healthbars.toggleMod", InputConstants.UNKNOWN.getValue(),
             UNDERTALE_HEALTHBARS_CATEGORY);
 
     public static final KeyMapping OPEN_CONFIG = registerKeybind(
-            "key.undertale_healthbars.openConfig", GLFW.GLFW_KEY_UNKNOWN,
+            "key.undertale_healthbars.openConfig", InputConstants.UNKNOWN.getValue(),
             UNDERTALE_HEALTHBARS_CATEGORY);
 
 
@@ -25,7 +24,7 @@ public class ModKeybinds {
     private static KeyMapping registerKeybind(String name, int default_key, KeyMapping.Category category) {
         return KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 name, // The translation key of the keybinding's name
-                InputConstants.Type.KEYSYM, // The type of the keybinding, KEYSYM for keyboard, MOUSE for mouse.
+                InputConstants.Type.KEYBOARD, // The type of the keybinding, KEYBOARD for keyboard, MOUSE for mouse.
                 default_key, // The keycode of the key
                 category // The translation key of the keybinding's category.
         ));
